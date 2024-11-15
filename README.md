@@ -1,4 +1,4 @@
-# ngr
+# ngr (nex gen research)
 
 ## Project setup
 ```

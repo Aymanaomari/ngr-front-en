@@ -1,26 +1,143 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomeView from "../views/HomeView.vue";
+
+import TopMenu from "../layouts/top-menu/Main.vue";
+import DashboardOverview2 from "../views/dashboard-overview-2/Main.vue";
+import Login from "../myviews/login/Main.vue";
+import Register from "../views/register/Main.vue";
+import ErrorPage from "../views/error-page/Main.vue";
+
+/*my views*/
+
+import adminDashboard from "../myviews/adminDashboard/adminDashboard.vue";
+import ProjectsManagement from "../myviews/projectManagement/projectsManagement.vue";
+import usersManagemet from "../myviews/usermanagement/usersManagement.vue";
+import profileView from "../myviews/profile/profileView.vue";
+import personalCalendar from "../views/$personal-calendar-Page/PersonalCalendar.vue";
+import personalInformation from "../myviews/profile/personalInformation.vue";
+/*services*/
+import Roles from "../utils/roles";
+import { isLogin } from "../services/auth.service";
+import { getUserStore } from "../stores";
 
 const routes = [
   {
     path: "/",
-    name: "home",
-    component: HomeView,
+    component: TopMenu,
+    children: [
+      {
+        path: "/admindashboard",
+        name: "dashboard1",
+        component: adminDashboard,
+        meta: {
+          authorize: [Roles.ADMIN],
+        },
+      },
+      {
+        path: "",
+        name: "dashboard2",
+        component: DashboardOverview2,
+        meta: {
+          authorize: [Roles.USER],
+        },
+      },
+      {
+        path: "/allusers",
+        name: "usersManagement",
+        component: usersManagemet,
+        meta: {
+          authorize: [Roles.ADMIN, Roles.REGISTREDUSER],
+        },
+      },
+      {
+        path: "/personalcalendar",
+        name: "personalCalendar",
+        component: personalCalendar,
+        meta: {
+          authorize: [Roles.ADMIN, Roles.USER],
+        },
+      },
+      {
+        path: "/projectsManagement",
+        name: "projectManagement",
+        component: ProjectsManagement,
+        meta: {
+          authorize: [Roles.ADMIN],
+        },
+      },
+
+      {
+        path: "/profile",
+        name: "profile",
+        component: profileView,
+        meta: {
+          authorize: [Roles.ADMIN, Roles.REGISTREDUSER],
+        },
+        children: [
+          {
+            path: "",
+            name: "personalInformation",
+            component: personalInformation,
+          },
+        ],
+      },
+    ],
   },
   {
-    path: "/about",
-    name: "about",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
+    path: "/login",
+    name: "login",
+    component: Login,
+  },
+  {
+    path: "/register",
+    name: "register",
+    component: Register,
+  },
+  {
+    path: "/error-page",
+    name: "error-page",
+    component: ErrorPage,
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    component: ErrorPage,
   },
 ];
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory(),
   routes,
+  scrollBehavior(to, from, savedPosition) {
+    return savedPosition || { left: 0, top: 0 };
+  },
+});
+
+router.beforeEach(async (to, from, next) => {
+  // clear alert on route change
+  // const alertStore = useAlertStore();
+  // alertStore.clear();
+
+  // redirect to login page if not logged in and trying to access a restricted page
+  const publicPages = ["/login", "/register"];
+  const authRequired = !publicPages.includes(to.path);
+  const { authorize } = to.meta;
+
+  if (authRequired && !isLogin()) {
+    console.log("is not login");
+    return next({ path: "/login" });
+  }
+  if (!authRequired && isLogin()) {
+    console.log("is logged");
+    return next({ path: "/" });
+  }
+
+  if (authorize) {
+    if (authorize.length && !getUserStore().user.hasAnyRole(authorize)) {
+      // role not authorised so redirect to home page
+      return next({ path: "/" });
+    }
+  }
+
+  next();
 });
 
 export default router;

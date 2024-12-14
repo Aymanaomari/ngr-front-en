@@ -29,13 +29,24 @@ export const useTopMenuStore = defineStore("topMenu", {
           title: "projectManagement",
         },
         {
-          icon: "CalendarIcon",
+          icon: "HomeIcon",
           pageName: "personalCalendar",
           title: "Calendar",
         },
       ];
 
-      const userMenu = [];
+      const userMenu = [
+        {
+          icon: "HomeIcon",
+          pageName: "dashboard2",
+          title: "Dashboard",
+        },
+        {
+          icon: "HomeIcon",
+          pageName: "personalCalendar",
+          title: "Calendar",
+        },
+      ];
 
       // Build the final menu based on roles
       this.menu = [

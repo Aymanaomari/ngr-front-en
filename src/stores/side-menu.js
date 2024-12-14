@@ -28,14 +28,15 @@ export const useSideMenuStore = defineStore("sideMenu", {
           pageName: "projectManagement",
           title: "projectManagement",
         },
-        {
-          icon: "CalendarIcon",
-          pageName: "personalCalendar",
-          title: "Calendar",
-        },
       ];
 
-      const userMenu = [];
+      const userMenu = [
+        {
+          icon: "HomeIcon",
+          pageName: "dashboard2",
+          title: "Dashboard",
+        },
+      ];
 
       // Build the final menu based on roles
       this.menu = [

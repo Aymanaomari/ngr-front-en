@@ -12,8 +12,8 @@ import adminDashboard from "../myviews/adminDashboard/adminDashboard.vue";
 import ProjectsManagement from "../myviews/projectManagement/projectsManagement.vue";
 import usersManagemet from "../myviews/usermanagement/usersManagement.vue";
 import profileView from "../myviews/profile/profileView.vue";
-import personalCalendar from "../views/$personal-calendar-Page/PersonalCalendar.vue";
 import personalInformation from "../myviews/profile/personalInformation.vue";
+import calendarView from "../myviews/calendar/calendarView.vue";
 /*services*/
 import Roles from "../utils/roles";
 import { isLogin } from "../services/auth.service";
@@ -37,7 +37,7 @@ const routes = [
         name: "dashboard2",
         component: DashboardOverview2,
         meta: {
-          authorize: [Roles.USER],
+          authorize: [Roles.REGISTREDUSER],
         },
       },
       {
@@ -45,15 +45,15 @@ const routes = [
         name: "usersManagement",
         component: usersManagemet,
         meta: {
-          authorize: [Roles.ADMIN, Roles.REGISTREDUSER],
+          authorize: [Roles.ADMIN],
         },
       },
       {
-        path: "/personalcalendar",
+        path: "/calendar",
         name: "personalCalendar",
-        component: personalCalendar,
+        component: calendarView,
         meta: {
-          authorize: [Roles.ADMIN, Roles.USER],
+          authorize: [Roles.ADMIN, Roles.REGISTREDUSER],
         },
       },
       {

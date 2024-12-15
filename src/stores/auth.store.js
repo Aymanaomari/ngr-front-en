@@ -6,8 +6,8 @@ export const useAuthStore = defineStore({
   id: "auth",
   state: () => ({
     // initialize state from local storage to enable user to stay logged in
-    token: localStorage.useItem("token"),
-    exp: localStorage.useItem("exp"),
+    token: localStorage.getItem("token"),
+    exp: localStorage.getItem("exp"),
   }),
   actions: {
     async login(token, user) {
@@ -29,6 +29,10 @@ export const useAuthStore = defineStore({
       localStorage.setItem("token", token);
       localStorage.setItem("exp", expToken.toString());
       this.exp = expToken;
+    },
+    async clearToken(state) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("exp");
     },
   },
 });

@@ -29,19 +29,32 @@ export const useTopMenuStore = defineStore("topMenu", {
           title: "projectManagement",
         },
         {
-          icon: "CalendarIcon",
+          icon: "HomeIcon",
           pageName: "personalCalendar",
           title: "Calendar",
         },
       ];
 
-      const userMenu = [];
+      const userMenu = [
+        {
+          icon: "HomeIcon",
+          pageName: "dashboard2",
+          title: "Dashboard",
+        },
+        {
+          icon: "HomeIcon",
+          pageName: "personalCalendar",
+          title: "Calendar",
+        },
+      ];
 
       // Build the final menu based on roles
       this.menu = [
         ...(userRoles.includes(Roles.ADMIN) ? adminMenu : []),
         ...(userRoles.includes(Roles.USER) ? userMenu : []),
       ];
+
+      console.log("generated Menu" + this.menu.values);
     },
   },
 });

@@ -14,7 +14,7 @@
             class="w-6"
             src="@/assets/images/logo.svg"
           />
-          <span class="text-white text-lg ml-3"> Rubick </span>
+          <span class="text-white text-lg ml-3"> NexGenResearch </span>
         </router-link>
         <!-- END: Logo -->
         <!-- BEGIN: Breadcrumb -->
@@ -205,8 +205,9 @@
               </DropdownItem>
 
               <DropdownDivider class="border-white/[0.08]" />
-              <DropdownItem class="hover:bg-white/5">
-                <ToggleRightIcon class="w-4 h-4 mr-2" /> Logout
+              <DropdownItem class="hover:bg-white/5" @click="logoutm()">
+                <ToggleRightIcon class="w-4 h-4 mr-2" />
+                Logout
               </DropdownItem>
             </DropdownContent>
           </DropdownMenu>
@@ -320,6 +321,7 @@ import {
   showSearchDropdown,
   hideSearchDropdown,
 } from "./index";
+import { logout } from "../../services/auth.service";
 
 export default {
   components: {
@@ -370,6 +372,11 @@ export default {
     return {
       forceActiveMenu: this.provideForceActiveMenu,
     };
+  },
+  methods: {
+    logoutm() {
+      logout();
+    },
   },
 };
 </script>

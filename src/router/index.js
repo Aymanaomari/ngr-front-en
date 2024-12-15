@@ -5,7 +5,7 @@ import DashboardOverview2 from "../views/dashboard-overview-2/Main.vue";
 import Login from "../myviews/login/Main.vue";
 import Register from "../views/register/Main.vue";
 import ErrorPage from "../views/error-page/Main.vue";
-
+import SimpleMenu from "../layouts/simple-menu/Main.vue";
 /*my views*/
 
 import adminDashboard from "../myviews/adminDashboard/adminDashboard.vue";
@@ -14,10 +14,15 @@ import usersManagemet from "../myviews/usermanagement/usersManagement.vue";
 import profileView from "../myviews/profile/profileView.vue";
 import personalInformation from "../myviews/profile/personalInformation.vue";
 import calendarView from "../myviews/calendar/calendarView.vue";
+import projectMenu from "../layouts/projectMenu/Main.vue";
+import profjectFileManager from "../myviews/project-file-manager/Main.vue";
 /*services*/
 import Roles from "../utils/roles";
+import RolesPerGroup from "../utils/groupRoles";
 import { isLogin } from "../services/auth.service";
 import { getUserStore } from "../stores";
+import { useTopMenuStore } from "../stores/top-menu";
+import { useProjectMenuStore } from "../stores/project-menu";
 
 const routes = [
   {
@@ -80,6 +85,29 @@ const routes = [
           },
         ],
       },
+      {
+        path: "/project/:name",
+        name: "SimpleMenu",
+        component: projectMenu,
+        children: [
+          {
+            path: "",
+            meta: {
+              meta: { authorize: [Roles.REGISTREDUSER, Roles.ADMIN] },
+              groupAuthorize: [RolesPerGroup.GROUPADMIN, RolesPerGroup.MEMBER],
+            },
+          },
+          {
+            path: "Depot",
+            name: "ProjectDepot",
+            component: profjectFileManager,
+            meta: {
+              meta: { authorize: [Roles.REGISTREDUSER, Roles.ADMIN] },
+              groupAuthorize: [RolesPerGroup.GROUPADMIN, RolesPerGroup.MEMBER],
+            },
+          },
+        ],
+      },
     ],
   },
   {
@@ -119,7 +147,7 @@ router.beforeEach(async (to, from, next) => {
   // redirect to login page if not logged in and trying to access a restricted page
   const publicPages = ["/login", "/register"];
   const authRequired = !publicPages.includes(to.path);
-  const { authorize } = to.meta;
+  const { authorize, groupAuthorize } = to.meta;
 
   if (authRequired && !isLogin()) {
     console.log("is not login");
@@ -131,8 +159,30 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (authorize) {
+    if (authorize.length && getUserStore().user.hasAnyRole([Roles.ADMIN])) {
+      useTopMenuStore().generateMenu();
+      return next();
+    }
+  }
+
+  if (authorize) {
     if (authorize.length && !getUserStore().user.hasAnyRole(authorize)) {
-      // role not authorised so redirect to home page
+      useTopMenuStore().generateMenu();
+      return next({ path: "/" });
+    }
+  }
+
+  if (groupAuthorize) {
+    const group = to.params.name;
+    console.log("Group name:", group);
+    console.log("Group Authorize roles:", groupAuthorize);
+    useProjectMenuStore().generateMenu(group);
+
+    if (getUserStore().user.hasAnyRole([Roles.ADMIN])) {
+      return next();
+    }
+    if (!getUserStore().user.hasRoleInGroup(group, groupAuthorize)) {
+      console.log(`User is not authorized for group: ${group}`);
       return next({ path: "/" });
     }
   }

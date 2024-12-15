@@ -5,26 +5,33 @@ import Roles from "../utils/roles.js";
 import ax, { getAxios } from "../utils/axios";
 import { useTopMenuStore } from "../stores/top-menu.js";
 import { useSideMenuStore } from "../stores/side-menu.js";
+import RolesPerGroup from "../utils/groupRoles.js";
+import { useProjectMenuStore } from "../stores/project-menu.js";
 
 export const login = async (email, password) => {
-  //   return await ax.post(`/auth/login`, {
-  //     email,
-  //     password,
-  //   });
+  // Simulate login by creating a user object
   const user = new User();
   user.first_name = "ayman";
   user.last_name = "aomari";
   user.email = email;
   user.password = password;
   user.roles = [Roles.ADMIN];
+  user.rolesPergroups = [
+    { group: "teamA", roles: [RolesPerGroup.ADMIN, RolesPerGroup.MEMBER] },
+  ];
   user.image = "";
   user.username = "ayman123";
 
-  getUserStore().setMe(user);
+  // Store user information in sessionStorage
+  sessionStorage.setItem("user", JSON.stringify(user));
 
+  // Store other session-related data if needed
+  getUserStore().setMe(user);
   useTopMenuStore().generateMenu();
   useSideMenuStore().generateMenu();
+  useProjectMenuStore().generateMenu();
 
+  // Redirect based on user role
   if (user.roles.includes(Roles.ADMIN)) {
     router.push("/admindashboard");
   } else {
@@ -95,15 +102,18 @@ export const isLogin = () => {
 };
 
 export const logout = async () => {
-  await getAxios()
-    .get(`/auth/logout`)
-    .finally(() => {
-      localStorage.removeItem("token");
-      localStorage.removeItem("exp");
-      getUserStore().$reset();
-      getAuthStore().$reset();
-      router.replace("/login");
-    });
+  // await getAxios()
+  //   .get(`/auth/logout`)
+  //   .finally(() => {
+  //     localStorage.removeItem("token");
+  //     localStorage.removeItem("exp");
+  //     getUserStore().$reset();
+  //     getAuthStore().$reset();
+  //     router.replace("/login");
+  //   });
+  getUserStore().clearUser();
+  getAuthStore().clearToken();
+  router.replace("/login");
 };
 
 export const autoRefreshToken = async () => {

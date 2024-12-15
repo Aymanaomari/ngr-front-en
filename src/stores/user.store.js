@@ -3,10 +3,23 @@ import User from "../model/user.js";
 
 export const useUserStore = defineStore({
   id: "users",
-  state: () => ({
-    // initialize state from local storage to enable user to stay logged in
-    user: new User(),
-  }),
+  state: () => {
+    const userFromStorage = JSON.parse(sessionStorage.getItem("user"));
+
+    if (userFromStorage) {
+      const user = new User();
+      user.first_name = userFromStorage.first_name;
+      user.last_name = userFromStorage.last_name;
+      user.email = userFromStorage.email;
+      user.image = userFromStorage.image;
+      user.username = userFromStorage.username;
+      user.roles = userFromStorage.roles;
+      user.rolesPergroups = userFromStorage.rolesPergroups;
+      return { user };
+    }
+
+    return { user: new User() };
+  },
 
   actions: {
     async setMe(user) {
@@ -16,9 +29,18 @@ export const useUserStore = defineStore({
       me.email = user.email;
       me.image = user.image;
       me.username = user.username;
-      me.email = user.email;
       me.roles = user.roles;
+      me.rolesPergroups = user.rolesPergroups;
+
       this.user = me;
+
+      // Store the user data in sessionStorage
+      sessionStorage.setItem("user", JSON.stringify(me));
+    },
+
+    clearUser() {
+      this.user = new User();
+      sessionStorage.removeItem("user");
     },
   },
 });

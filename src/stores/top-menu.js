@@ -53,6 +53,8 @@ export const useTopMenuStore = defineStore("topMenu", {
         ...(userRoles.includes(Roles.ADMIN) ? adminMenu : []),
         ...(userRoles.includes(Roles.USER) ? userMenu : []),
       ];
+
+      console.log("generated Menu" + this.menu.values);
     },
   },
 });

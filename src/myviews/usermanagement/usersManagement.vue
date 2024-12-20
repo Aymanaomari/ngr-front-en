@@ -215,22 +215,16 @@
             :value="userOnEdit.email"
           />
         </div>
-        <div class="col-span-12 sm:col-span-6">
-          <label for="modal-form-5" class="form-label">Doesn't Have</label>
-          <input
-            id="modal-form-5"
-            type="text"
-            class="form-control"
-            placeholder="Job, Work, Documentation"
-          />
-        </div>
-        <div class="col-span-12 sm:col-span-6">
-          <label for="modal-form-6" class="form-label">Size</label>
-          <select id="modal-form-6" class="form-select">
-            <option>10</option>
-            <option>25</option>
-            <option>35</option>
-            <option>50</option>
+        <div class="col-span-12">
+          <label for="modal-form-5" class="form-label">Status</label>
+          <select
+            id="modal-form-6"
+            class="form-select"
+            :value="userOnEdit.status"
+          >
+            <option class="text-success">active</option>
+            <option class="text-danger">inactive</option>
+            <option class="text-danger">deleted</option>
           </select>
         </div>
       </ModalBody>
@@ -242,7 +236,13 @@
         >
           Cancel
         </button>
-        <button type="button" class="btn btn-primary w-20">Send</button>
+        <button
+          type="button"
+          class="btn btn-primary w-20"
+          @click="changeUserDetails(userOnEdit)"
+        >
+          Save
+        </button>
       </ModalFooter>
     </Modal>
     <!-- END: Modal Content -->
@@ -251,7 +251,7 @@
   <!-- Modal and other modals... -->
 </template>
 <script>
-import { getUsers } from "../../services/fake/users.service";
+import { useFakeUsersStore } from "../../stores/fakeUser";
 
 export default {
   data() {
@@ -261,7 +261,7 @@ export default {
       currentPage: 1,
       usersPerPage: 10,
       searchQuery: "",
-      users: getUsers(),
+      users: useFakeUsersStore().users,
       userOnEdit: {},
     };
   },
@@ -301,6 +301,7 @@ export default {
     hideEditModal() {
       this.userOnEdit = null;
     },
+    changeUserDetails() {},
   },
 };
 </script>

@@ -16,6 +16,9 @@ import personalInformation from "../myviews/profile/personalInformation.vue";
 import calendarView from "../myviews/calendar/calendarView.vue";
 import projectMenu from "../layouts/projectMenu/Main.vue";
 import profjectFileManager from "../myviews/project-file-manager/Main.vue";
+import projectChat from "../myviews/projectChat/Main.vue";
+import globalChatConent from "../myviews/projectChat/globalChatContent/Main.vue";
+
 /*services*/
 import Roles from "../utils/roles";
 import RolesPerGroup from "../utils/groupRoles";
@@ -30,7 +33,7 @@ const routes = [
     component: TopMenu,
     children: [
       {
-        path: "/admindashboard",
+        path: "/Admin",
         name: "dashboard1",
         component: adminDashboard,
         meta: {
@@ -38,7 +41,7 @@ const routes = [
         },
       },
       {
-        path: "",
+        path: "/",
         name: "dashboard2",
         component: DashboardOverview2,
         meta: {
@@ -46,7 +49,7 @@ const routes = [
         },
       },
       {
-        path: "/allusers",
+        path: "/Admin/usersManagement",
         name: "usersManagement",
         component: usersManagemet,
         meta: {
@@ -62,7 +65,7 @@ const routes = [
         },
       },
       {
-        path: "/projectsManagement",
+        path: "/Admin/projectsManagement",
         name: "projectManagement",
         component: ProjectsManagement,
         meta: {
@@ -106,6 +109,24 @@ const routes = [
               groupAuthorize: [RolesPerGroup.GROUPADMIN, RolesPerGroup.MEMBER],
             },
           },
+          {
+            path: "Chat",
+            name: "ProjectChat",
+            component: projectChat,
+            meta: {
+              meta: { authorize: [Roles.REGISTREDUSER, Roles.ADMIN] },
+            },
+            children: [
+              {
+                path: "global",
+                name: "ProjectChatGlobal",
+                component: globalChatConent,
+                meta: {
+                  groupAuthorize: [RolesPerGroup.GROUPADMIN],
+                },
+              },
+            ],
+          },
         ],
       },
     ],
@@ -125,6 +146,7 @@ const routes = [
     name: "error-page",
     component: ErrorPage,
   },
+  {},
   {
     path: "/:pathMatch(.*)*",
     component: ErrorPage,
@@ -151,10 +173,13 @@ router.beforeEach(async (to, from, next) => {
 
   if (authRequired && !isLogin()) {
     console.log("is not login");
-    return next({ path: "/login" });
+    return next();
   }
   if (!authRequired && isLogin()) {
     console.log("is logged");
+    if ((getUserStore().user.roles = roles.ADMIN)) {
+      return next({ path: "/Admin" });
+    }
     return next({ path: "/" });
   }
 
@@ -177,7 +202,7 @@ router.beforeEach(async (to, from, next) => {
     console.log("Group name:", group);
     console.log("Group Authorize roles:", groupAuthorize);
     useProjectMenuStore().generateMenu(group);
-
+    useTopMenuStore().menu = [];
     if (getUserStore().user.hasAnyRole([Roles.ADMIN])) {
       return next();
     }

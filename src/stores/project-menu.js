@@ -11,12 +11,18 @@ export const useProjectMenuStore = defineStore("ProjectMenu", {
     generateMenu(group) {
       const userStore = getUserStore();
       const user = userStore.user;
+
       // Define sections accessible based on roles
       const adminMenu = [
         {
           icon: "ServerIcon",
           pageName: "ProjectDepot",
           title: "Depot",
+        },
+        {
+          icon: "MessageSquareIcon",
+          pageName: "ProjectChat",
+          title: "chat",
         },
       ];
       const userMenu = [
@@ -25,7 +31,13 @@ export const useProjectMenuStore = defineStore("ProjectMenu", {
           pageName: "ProjectDepot",
           title: "Depot",
         },
+        {
+          icon: "MessageSquareIcon",
+          pageName: "ProjectChat",
+          title: "chat",
+        },
       ];
+
       if (user.hasAnyRole([Roles.ADMIN])) {
         this.menu = adminMenu;
       } else {
@@ -37,6 +49,9 @@ export const useProjectMenuStore = defineStore("ProjectMenu", {
           ...(user.hasRoleInGroup(group, RolesPerGroup.MEMBER) ? userMenu : []),
         ];
       }
+
+      // Log the generated menu in a readable format
+      console.log("The generated menu:", JSON.stringify(this.menu, null, 2));
     },
   },
 });

@@ -18,6 +18,7 @@ export const login = async (email, password) => {
   user.roles = [Roles.ADMIN];
   user.rolesPergroups = [
     { group: "teamA", roles: [RolesPerGroup.ADMIN, RolesPerGroup.MEMBER] },
+    { group: "teamB", roles: [RolesPerGroup.MEMBER] },
   ];
   user.image = "";
   user.username = "ayman123";
@@ -32,8 +33,9 @@ export const login = async (email, password) => {
   useProjectMenuStore().generateMenu();
 
   // Redirect based on user role
+  // Redirect based on user role
   if (user.roles.includes(Roles.ADMIN)) {
-    router.push("/admindashboard");
+    router.push("/admin");
   } else {
     router.push("/");
   }

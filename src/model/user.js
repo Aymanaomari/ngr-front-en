@@ -31,12 +31,18 @@ export default class User {
       return false;
     }
 
-    const hasAccess = access_roles.some((role) =>
+    // Ensure access_roles is an array
+    const requiredRoles = Array.isArray(access_roles)
+      ? access_roles
+      : [access_roles];
+
+    // Check if any of the requiredRoles is included in groupRoles
+    const hasAccess = requiredRoles.some((role) =>
       groupRoles.roles.includes(role)
     );
 
     console.log(`Checking access for group: ${group}`, {
-      requiredRoles: access_roles,
+      requiredRoles,
       userRoles: groupRoles.roles,
       hasAccess,
     });

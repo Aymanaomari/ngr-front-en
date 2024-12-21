@@ -244,19 +244,12 @@ export const useFakeUsersStore = defineStore("fakeUsers", {
         email: "evaalexander030@example.com",
         status: "deleted",
       },
-    ]
+    ],
   }),
   getters: {
     getUsers(state) {
       return state.users;
     },
   },
-  actions: {
-    updateUserDetail(userOnEdit) {
-    
-                  users.find((user) => user.id == userOnEdit.id) =userOnEdit;
- 
- 
-    },
-  },
+  actions: {},
 });

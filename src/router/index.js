@@ -17,8 +17,9 @@ import calendarView from "../myviews/calendar/calendarView.vue";
 import projectMenu from "../layouts/projectMenu/Main.vue";
 import profjectFileManager from "../myviews/project-file-manager/Main.vue";
 import projectChat from "../myviews/projectChat/Main.vue";
-import globalChatConent from "../myviews/projectChat/globalChatContent/Main.vue";
-
+import personalChatContent from "../myviews/projectChat/personalChatContent/Main.vue";
+import globalChatContent from "../myviews/projectChat/globalChatContent/Main.vue";
+import subGroupChatContent from "../myviews/projectChat/subGroupChatContent/Main.vue";
 /*services*/
 import Roles from "../utils/roles";
 import RolesPerGroup from "../utils/groupRoles";
@@ -33,7 +34,7 @@ const routes = [
     component: TopMenu,
     children: [
       {
-        path: "/Admin",
+        path: "/Admin/dashboard",
         name: "dashboard1",
         component: adminDashboard,
         meta: {
@@ -41,7 +42,7 @@ const routes = [
         },
       },
       {
-        path: "/",
+        path: "/dashboard",
         name: "dashboard2",
         component: DashboardOverview2,
         meta: {
@@ -111,19 +112,30 @@ const routes = [
           },
           {
             path: "Chat",
-            name: "ProjectChat",
             component: projectChat,
             meta: {
               meta: { authorize: [Roles.REGISTREDUSER, Roles.ADMIN] },
+              groupAuthorize: [RolesPerGroup.GROUPADMIN, RolesPerGroup.MEMBER],
             },
             children: [
               {
-                path: "global",
-                name: "ProjectChatGlobal",
-                component: globalChatConent,
-                meta: {
-                  groupAuthorize: [RolesPerGroup.GROUPADMIN],
-                },
+                path: "",
+                name: "ProjectChat",
+                component: globalChatContent,
+              },
+              {
+                path: "subgroup/:id",
+                name: "subgroupChat",
+                component: subGroupChatContent,
+              },
+              {
+                path: "personal/:userId",
+                name: "personalChat",
+                component: personalChatContent,
+                props: (route) => ({
+                  groupName: route.params.name,
+                  userId: route.params.userId,
+                }),
               },
             ],
           },
@@ -167,22 +179,30 @@ router.beforeEach(async (to, from, next) => {
   // alertStore.clear();
 
   // redirect to login page if not logged in and trying to access a restricted page
+
   const publicPages = ["/login", "/register"];
   const authRequired = !publicPages.includes(to.path);
   const { authorize, groupAuthorize } = to.meta;
 
+  console.log("hello 1");
+
   if (authRequired && !isLogin()) {
-    console.log("is not login");
-    return next();
-  }
-  if (!authRequired && isLogin()) {
-    console.log("is logged");
-    if ((getUserStore().user.roles = roles.ADMIN)) {
-      return next({ path: "/Admin" });
-    }
-    return next({ path: "/" });
+    return next({ path: "/login" });
   }
 
+  if (!authRequired && !isLogin()) {
+    return next();
+  }
+
+  if ((!authRequired && isLogin()) || (to.path == "/" && isLogin())) {
+    console.log("is logged");
+    if (getUserStore().user.roles == Roles.ADMIN) {
+      return next({ path: "/Admin/dashboard" });
+    }
+    return next({ path: "/dashboard" });
+  }
+
+  console.log("hello 4");
   if (authorize) {
     if (authorize.length && getUserStore().user.hasAnyRole([Roles.ADMIN])) {
       useTopMenuStore().generateMenu();
@@ -192,7 +212,6 @@ router.beforeEach(async (to, from, next) => {
 
   if (authorize) {
     if (authorize.length && !getUserStore().user.hasAnyRole(authorize)) {
-      useTopMenuStore().generateMenu();
       return next({ path: "/" });
     }
   }
@@ -213,6 +232,16 @@ router.beforeEach(async (to, from, next) => {
   }
 
   next();
+});
+
+router.afterEach((to, from, next) => {
+  const publicPages = ["/login", "/register", "/"];
+  const authRequired = !publicPages.includes(to.path);
+  const { authorize, groupAuthorize } = to.meta;
+
+  if (!authRequired && !groupAuthorize) {
+    useTopMenuStore().generateMenu();
+  }
 });
 
 export default router;

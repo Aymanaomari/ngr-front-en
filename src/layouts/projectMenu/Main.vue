@@ -1,5 +1,5 @@
 <template>
-  <div class="py-2">
+  <div class="h-[90%]">
     <DarkModeSwitcher />
     <MainColorSwitcher />
     <MobileMenu />
@@ -48,6 +48,7 @@ import { helper as $h } from "@/utils/helper";
 import { nestedMenu } from "@/layouts/side-menu";
 import dom from "@left4code/tw-starter/dist/js/dom";
 import { useRoute, useRouter } from "vue-router";
+import router from "../../router";
 export default {
   name: "YourComponent",
 
@@ -106,6 +107,9 @@ export default {
     this.setupLayout();
     await this.initializeMenu(); // Initialize the menu dynamically.
     console.log(this.formattedMenu);
+    if (this.$route.params.id == null) {
+      this.$router.push({ name: "ProjectChat" });
+    }
   },
 
   provide() {
@@ -115,3 +119,9 @@ export default {
   },
 };
 </script>
+
+<style>
+.content {
+  padding-bottom: 40px;
+}
+</style>

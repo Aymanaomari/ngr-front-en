@@ -26,7 +26,7 @@ export const useTopMenuStore = defineStore("topMenu", {
         {
           icon: "SettingsIcon",
           pageName: "projectManagement",
-          title: "projectManagement",
+          title: "Project Management",
         },
         {
           icon: "HomeIcon",
@@ -48,13 +48,16 @@ export const useTopMenuStore = defineStore("topMenu", {
         },
       ];
 
-      // Build the final menu based on roles
-      this.menu = [
-        ...(userRoles.includes(Roles.ADMIN) ? adminMenu : []),
-        ...(userRoles.includes(Roles.USER) ? userMenu : []),
-      ];
+      // Priority logic: Admin role takes precedence over User role
+      if (userRoles.includes(Roles.ADMIN)) {
+        this.menu = adminMenu;
+      } else if (userRoles.includes(Roles.USER)) {
+        this.menu = userMenu;
+      } else {
+        this.menu = []; // Default to empty menu if no roles match
+      }
 
-      console.log("generated Menu" + this.menu.values);
+      console.log("Generated Menu:", this.menu);
     },
   },
 });

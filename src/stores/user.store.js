@@ -8,6 +8,7 @@ export const useUserStore = defineStore({
 
     if (userFromStorage) {
       const user = new User();
+      user.id = userFromStorage.id;
       user.first_name = userFromStorage.first_name;
       user.last_name = userFromStorage.last_name;
       user.email = userFromStorage.email;
@@ -24,6 +25,7 @@ export const useUserStore = defineStore({
   actions: {
     async setMe(user) {
       const me = new User();
+      me.id = user.id;
       me.first_name = user.first_name;
       me.last_name = user.last_name;
       me.email = user.email;

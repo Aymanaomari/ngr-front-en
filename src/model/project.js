@@ -6,6 +6,9 @@ class Project {
     theme,
     type,
     visibilite,
+    groupMembers,
+    groupAdmins,
+    subGroups = [],
     created_date = new Date(),
   }) {
     this.nom_long = nom_long;
@@ -15,6 +18,9 @@ class Project {
     this.type = type;
     this.visibilite = visibilite;
     this.created_date = new Date(created_date);
+    this.groupMembers = groupMembers;
+    this.groupAdmins = groupAdmins;
+    this.subGroups = subGroups; // Array of SubGroup objects
   }
 }
 

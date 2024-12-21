@@ -1,7 +1,7 @@
 <template>
   <!-- BEGIN: Chat Content -->
   <div class="intro-y col-span-12 lg:col-span-8 2xl:col-span-9">
-    <div class="chat__box box">
+    <div class="chat__box box h-[90%]">
       <!-- BEGIN: Chat Active -->
       <div class="h-full flex flex-col">
         <div
@@ -9,14 +9,16 @@
         >
           <div class="flex items-center">
             <!-- <div class="w-10 h-10 sm:w-12 sm:h-12 flex-none image-fit relative">
-              <img
-                alt="Midone Tailwind HTML Admin Template"
-                class="rounded-full"
-                :src="$f()[0].photos[0]"
-              />
-            </div> -->
+                <img
+                  alt="Midone Tailwind HTML Admin Template"
+                  class="rounded-full"
+                  :src="$f()[0].photos[0]"
+                />
+              </div> -->
             <div class="ml-3 mr-auto">
-              <div class="font-medium text-base">Global Chat</div>
+              <div class="font-medium text-base">
+                {{ subGroup.name }}
+              </div>
               <div class="text-slate-500 text-xs sm:text-sm">
                 <span class="mx-1 text-green-500">•</span> Online
               </div>
@@ -182,6 +184,7 @@ export default {
       projectData: {}, // Reactive state
       user: null,
       projectMessages: [],
+      subGroup: {},
     };
   },
   methods: {
@@ -210,7 +213,12 @@ export default {
   mounted() {
     this.projectData = getfakeUsersProjects();
     this.user = getUserStore().user.id;
-    this.projectMessages = this.projectData.globalMessages;
+    for (let subGroup of this.projectData.subGroups) {
+      if (subGroup.id == this.$route.params.id) {
+        this.subGroup = subGroup;
+        this.projectMessages = subGroup.messages;
+      }
+    }
   },
 };
 </script>

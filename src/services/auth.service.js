@@ -11,13 +11,14 @@ import { useProjectMenuStore } from "../stores/project-menu.js";
 export const login = async (email, password) => {
   // Simulate login by creating a user object
   const user = new User();
+  user.id = 7;
   user.first_name = "ayman";
   user.last_name = "aomari";
   user.email = email;
   user.password = password;
   user.roles = [Roles.ADMIN];
   user.rolesPergroups = [
-    { group: "teamA", roles: [RolesPerGroup.ADMIN, RolesPerGroup.MEMBER] },
+    { group: "teamA", roles: [RolesPerGroup.GROUPADMIN, RolesPerGroup.MEMBER] },
     { group: "teamB", roles: [RolesPerGroup.MEMBER] },
   ];
   user.image = "";
@@ -35,7 +36,7 @@ export const login = async (email, password) => {
   // Redirect based on user role
   // Redirect based on user role
   if (user.roles.includes(Roles.ADMIN)) {
-    router.push("/admin");
+    router.push("/");
   } else {
     router.push("/");
   }

@@ -1,6 +1,5 @@
 <template>
   <div>
-    <DarkModeSwitcher />
     <div class="container sm:px-10">
       <div class="block xl:grid grid-cols-2 gap-4">
         <!-- BEGIN: Register Info -->
@@ -11,7 +10,7 @@
               class="w-6"
               src="@/assets/images/logo.svg"
             />
-            <span class="text-white text-lg ml-3"> Rubick </span>
+            <span class="text-white text-lg ml-3"> NexGenResearch </span>
           </a>
           <div class="my-auto">
             <img
@@ -28,7 +27,7 @@
             <div
               class="-intro-x mt-5 text-lg text-white text-opacity-70 dark:text-slate-400"
             >
-              Manage all your e-commerce accounts in one place
+              Manage all your Projects in One Place
             </div>
           </div>
         </div>
@@ -54,39 +53,31 @@
                 type="text"
                 class="intro-x login__input form-control py-3 px-4 block"
                 placeholder="First Name"
+                v-model="firsName"
               />
               <input
                 type="text"
                 class="intro-x login__input form-control py-3 px-4 block mt-4"
                 placeholder="Last Name"
+                v-model="lastName"
               />
               <input
-                type="text"
+                type="email"
                 class="intro-x login__input form-control py-3 px-4 block mt-4"
                 placeholder="Email"
+                v-model="email"
               />
               <input
-                type="text"
+                type="password"
                 class="intro-x login__input form-control py-3 px-4 block mt-4"
                 placeholder="Password"
+                v-model="password"
               />
-              <div class="intro-x w-full grid grid-cols-12 gap-4 h-1 mt-3">
-                <div class="col-span-3 h-full rounded bg-success"></div>
-                <div class="col-span-3 h-full rounded bg-success"></div>
-                <div class="col-span-3 h-full rounded bg-success"></div>
-                <div
-                  class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"
-                ></div>
-              </div>
-              <a
-                href=""
-                class="intro-x text-slate-500 block mt-2 text-xs sm:text-sm"
-                >What is a secure password?</a
-              >
               <input
-                type="text"
+                type="password"
                 class="intro-x login__input form-control py-3 px-4 block mt-4"
                 placeholder="Password Confirmation"
+                v-model="passwordConfirmation"
               />
             </div>
             <div
@@ -107,11 +98,13 @@
             <div class="intro-x mt-5 xl:mt-8 text-center xl:text-left">
               <button
                 class="btn btn-primary py-3 px-4 w-full xl:w-32 xl:mr-3 align-top"
+                @click="registering()"
               >
                 Register
               </button>
               <button
                 class="btn btn-outline-secondary py-3 px-4 w-full xl:w-32 mt-3 xl:mt-0 align-top"
+                @click="goToSignIn()"
               >
                 Sign in
               </button>
@@ -124,12 +117,44 @@
   </div>
 </template>
 
-<script setup>
-import { onMounted } from "vue";
+<script>
 import DarkModeSwitcher from "@/components/dark-mode-switcher/Main.vue";
 import dom from "@left4code/tw-starter/dist/js/dom";
+import { register, login } from "../../services/auth.service";
 
-onMounted(() => {
-  dom("body").removeClass("main").removeClass("error-page").addClass("login");
-});
+export default {
+  components: {
+    DarkModeSwitcher,
+  },
+  data() {
+    return {
+      firsName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      passwordConfirmation: "",
+    };
+  },
+  mounted() {
+    dom("body").removeClass("main").removeClass("error-page").addClass("login");
+  },
+  methods: {
+    async registering() {
+      let message = await register(
+        this.firsName,
+        this.lastName,
+        this.email,
+        "0630706325",
+        this.password,
+        this.passwordConfirmation
+      );
+      if (message.status == 201) {
+        login(this.email, this.password);
+      }
+    },
+    goToSignIn() {
+      this.$router.push({ path: "/signin" });
+    },
+  },
+};
 </script>

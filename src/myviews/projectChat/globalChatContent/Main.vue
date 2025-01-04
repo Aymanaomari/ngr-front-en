@@ -174,6 +174,7 @@ import Roles from "../../../utils/roles";
 import { getfakeUsersProjects } from "../../../services/fake/projectMembers.service";
 import RolesPerGroup from "../../../utils/groupRoles";
 import { calculateTimeDifference } from "../../../utils/date";
+// import WebSocketClient from "../../../services/chat/chat.service";
 
 export default {
   data() {
@@ -211,6 +212,10 @@ export default {
     this.projectData = getfakeUsersProjects();
     this.user = getUserStore().user.id;
     this.projectMessages = this.projectData.globalMessages;
+    // let websocket = new WebSocketClient();
+    // websocket.connect(() => {
+    //   console.log("connected to websocket");
+    // });
   },
 };
 </script>

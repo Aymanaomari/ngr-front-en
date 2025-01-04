@@ -29,6 +29,11 @@ export const useTopMenuStore = defineStore("topMenu", {
           title: "Project Management",
         },
         {
+          icon: "DatabaseIcon",
+          pageName: "propositionManagement",
+          title: "Proposition Management",
+        },
+        {
           icon: "HomeIcon",
           pageName: "personalCalendar",
           title: "Calendar",
@@ -40,6 +45,11 @@ export const useTopMenuStore = defineStore("topMenu", {
           icon: "HomeIcon",
           pageName: "dashboard2",
           title: "Dashboard",
+        },
+        {
+          icon: "UsersIcon",
+          pageName: "myGroups",
+          title: "My Groups",
         },
         {
           icon: "HomeIcon",

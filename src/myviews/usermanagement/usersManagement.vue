@@ -56,25 +56,29 @@
         </thead>
         <tbody>
           <tr
-            v-for="(user, index) in paginatedUsers"
+            v-for="(data, index) in paginatedUsers"
             :key="index"
             class="h-14 table-report"
           >
-            <td>{{ user.userName }}</td>
-            <td>{{ user.firstName }}</td>
-            <td>{{ user.lastName }}</td>
-            <td>{{ user.email }}</td>
+            <td>
+              {{
+                data.user.firstName + " " + data.user.lastName || "No User Name"
+              }}
+            </td>
+            <td>{{ data.user.firstName || "No First Name" }}</td>
+            <td>{{ data.user.lastName || "No Last Name" }}</td>
+            <td>{{ data.email }}</td>
             <td class="w-40">
               <div
                 class="flex"
                 :class="{
-                  'text-success': user.status == 'active',
-                  'text-danger': user.status == 'inactive',
-                  'text-yellow-300': user.status == 'pending',
+                  'text-success': true,
+                  'text-danger': false,
+                  'text-yellow-300': false,
                 }"
               >
                 <CheckSquareIcon class="w-4 h-4 mr-2" />
-                {{ user.status }}
+                active
               </div>
             </td>
             <td class="table-report__action w-56">
@@ -82,7 +86,7 @@
                 <div
                   class="flex items-center mr-3 cursor-pointer"
                   @click="
-                    showEdit(user);
+                    showEdit(data);
                     editModal = true;
                   "
                 >
@@ -185,7 +189,7 @@
             id="modal-form-1"
             type="text"
             class="form-control"
-            :value="userOnEdit.firstName"
+            :value="userOnEdit.user.firstName"
           />
         </div>
         <div class="col-span-12 sm:col-span-6">
@@ -194,16 +198,7 @@
             id="modal-form-2"
             type="text"
             class="form-control"
-            :value="userOnEdit.lastName"
-          />
-        </div>
-        <div class="col-span-12">
-          <label for="modal-form-3" class="form-label">User name</label>
-          <input
-            id="modal-form-3"
-            type="text"
-            class="form-control"
-            :value="userOnEdit.userName"
+            :value="userOnEdit.user.lastName"
           />
         </div>
         <div class="col-span-12">
@@ -217,11 +212,7 @@
         </div>
         <div class="col-span-12">
           <label for="modal-form-5" class="form-label">Status</label>
-          <select
-            id="modal-form-6"
-            class="form-select"
-            :value="userOnEdit.status"
-          >
+          <select id="modal-form-6" class="form-select">
             <option class="text-success">active</option>
             <option class="text-danger">inactive</option>
             <option class="text-danger">deleted</option>
@@ -250,8 +241,9 @@
 
   <!-- Modal and other modals... -->
 </template>
+
 <script>
-import { useFakeUsersStore } from "../../stores/fakeUser";
+import { PaginateUsers } from "../../services/admin/userGestion.service";
 
 export default {
   data() {
@@ -261,8 +253,14 @@ export default {
       currentPage: 1,
       usersPerPage: 10,
       searchQuery: "",
-      users: useFakeUsersStore().users,
-      userOnEdit: {},
+      users: [], // Start with an empty array
+      userOnEdit: {
+        user: {
+          firstName: "",
+          lastName: "",
+        },
+        email: "",
+      },
     };
   },
   computed: {
@@ -280,7 +278,7 @@ export default {
     },
     filteredUsers() {
       return this.users.filter((user) =>
-        user.userName.toLowerCase().includes(this.searchQuery.toLowerCase())
+        user.email.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     },
     paginatedUsers() {
@@ -293,15 +291,35 @@ export default {
     changePage(page) {
       if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page;
+        this.fetchUsers(); // Fetch new data for the current page
       }
+    },
+    fetchUsers() {
+      PaginateUsers(this.currentPage - 1, this.usersPerPage)
+        .then((response) => {
+          this.users = response.data.content; // Populate users with real data
+        })
+        .catch((error) => {
+          console.error("Error fetching users:", error);
+        });
     },
     showEdit(User) {
       this.userOnEdit = User;
+      this.editModal = true;
     },
     hideEditModal() {
       this.userOnEdit = null;
+      this.editModal = false;
     },
-    changeUserDetails() {},
+    changeUserDetails() {
+      // Handle saving user details here
+    },
+  },
+  mounted() {
+    setTimeout(() => {
+      this.fetchUsers(); // Fetch initial data
+      console.log(this.paginatedUsers);
+    }, 100);
   },
 };
 </script>

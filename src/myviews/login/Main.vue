@@ -27,7 +27,7 @@
             <div
               class="-intro-x mt-5 text-lg text-white text-opacity-70 dark:text-slate-400"
             >
-              Manage all your e-commerce accounts in one place
+              Manage all your Projects in one Place
             </div>
           </div>
         </div>
@@ -84,6 +84,7 @@
               </button>
               <button
                 class="btn btn-outline-secondary py-3 px-4 w-full xl:w-32 mt-3 xl:mt-0 align-top"
+                @click="goToRegister()"
               >
                 Register
               </button>
@@ -134,6 +135,9 @@ export default {
   methods: {
     login() {
       log(this.loginInformation.email, this.loginInformation.password);
+    },
+    goToRegister() {
+      this.$router.push({ name: "register" });
     },
   },
 };

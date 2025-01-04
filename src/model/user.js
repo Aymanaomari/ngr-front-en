@@ -5,7 +5,7 @@ export default class User {
   username = null;
   image = null;
   email = null;
-  roles = [];
+  roles = null;
   rolesPergroups = [];
 
   constructor() {}

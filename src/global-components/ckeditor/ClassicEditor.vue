@@ -4,6 +4,7 @@
     ref="editorRef"
     v-editor-directive="{ props, emit, cacheData }"
     class="select"
+    :disabled="disabled"
   ></component>
 </template>
 

@@ -1,28 +1,39 @@
 import { defineStore } from "pinia";
 import User from "../model/user.js";
+import ax from "../utils/axios.js";
 
 export const useUserStore = defineStore({
   id: "users",
-  state: () => {
-    const userFromStorage = JSON.parse(sessionStorage.getItem("user"));
-
-    if (userFromStorage) {
-      const user = new User();
-      user.id = userFromStorage.id;
-      user.first_name = userFromStorage.first_name;
-      user.last_name = userFromStorage.last_name;
-      user.email = userFromStorage.email;
-      user.image = userFromStorage.image;
-      user.username = userFromStorage.username;
-      user.roles = userFromStorage.roles;
-      user.rolesPergroups = userFromStorage.rolesPergroups;
-      return { user };
-    }
-
-    return { user: new User() };
-  },
+  state: () => ({
+    user: new User(), // Placeholder for the user object
+    isLoading: true, // Flag to track loading state
+    error: null, // Error message (if any)
+  }),
 
   actions: {
+    async fetchUser() {
+      try {
+        const response = await ax.get("/registred-user/me"); // Adjust the endpoint to match your API
+        const userData = response.data;
+
+        const me = new User();
+        me.id = userData.id;
+        me.first_name = userData.first_name;
+        me.last_name = userData.last_name;
+        me.email = userData.email;
+        me.image = userData.image;
+        me.username = userData.username;
+        me.roles = userData.roles;
+        me.rolesPergroups = userData.rolesPergroups;
+
+        this.user = me;
+        this.isLoading = false; // Set loading to false after fetching
+      } catch (error) {
+        console.error("Failed to fetch user information:", error);
+        this.error = error.message || "Failed to fetch user data";
+        this.isLoading = false; // Stop loading on error
+      }
+    },
     async setMe(user) {
       const me = new User();
       me.id = user.id;
@@ -37,9 +48,7 @@ export const useUserStore = defineStore({
       this.user = me;
 
       // Store the user data in sessionStorage
-      sessionStorage.setItem("user", JSON.stringify(me));
     },
-
     clearUser() {
       this.user = new User();
       sessionStorage.removeItem("user");

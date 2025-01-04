@@ -1,45 +1,46 @@
-import { io } from "socket.io-client";
+// import SockJS from "sockjs-client";
+// import Stomp from "stompjs";
 
-class Socket {
-  constructor() {
-    this.socket = io("https://localhost:6543/ws");
-  }
+// class WebSocketClient {
+//   constructor(endpoint = "http://localhost:6541/ws") {
+//     this.endpoint = endpoint; // WebSocket endpoint
+//     this.socket = null;
+//     this.stompClient = null;
+//   }
 
-  connect() {
-    this.socket.on("connect", () => {
-      console.log("Connected to WebSocket!");
+//   // Initialize and connect to the WebSocket
+//   connect(onConnectedCallback) {
+//     this.socket = new SockJS(this.endpoint);
+//     this.stompClient = Stomp.over(this.socket);
 
-      // Listen for group messages
-      this.socket.on("groupMessage", (message) => {
-        this.displayMessage("Group: " + message.content);
-      });
+//     this.stompClient.connect({}, () => {
+//       console.log("Connected to WebSocket!");
+//       if (onConnectedCallback) {
+//         onConnectedCallback(this.stompClient); // Pass the client instance to the callback
+//       }
+//     });
+//   }
 
-      // Listen for private messages
-      this.socket.on("privateMessage", (message) => {
-        this.displayMessage("Private: " + message.content);
-      });
-    });
-  }
+//   // Subscribe to a topic
+//   subscribe(topic, messageCallback) {
+//     if (this.stompClient) {
+//       this.stompClient.subscribe(topic, (message) => {
+//         const parsedMessage = JSON.parse(message.body);
+//         messageCallback(parsedMessage);
+//       });
+//     } else {
+//       console.error("Cannot subscribe. WebSocket is not connected.");
+//     }
+//   }
 
-  // Send a message
-  sendMessage() {
-    const messageContent = document.getElementById("messageInput").value;
-    if (messageContent) {
-      this.socket.emit("sendMessage", {
-        content: messageContent,
-        sender: { nom: "Doe" },
-      });
-      document.getElementById("messageInput").value = ""; // Clear input
-    }
-  }
+//   // Send a message
+//   sendMessage(destination, message) {
+//     if (this.stompClient) {
+//       this.stompClient.send(destination, {}, JSON.stringify(message));
+//     } else {
+//       console.error("Cannot send message. WebSocket is not connected.");
+//     }
+//   }
+// }
 
-  // Display messages
-  displayMessage(message) {
-    const messagesDiv = document.getElementById("messages");
-    const messageElement = document.createElement("p");
-    messageElement.textContent = message;
-    messagesDiv.appendChild(messageElement);
-  }
-}
-
-export default Socket;
+// export default WebSocketClient;

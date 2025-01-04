@@ -33,6 +33,8 @@
     "qalendar": "^3.9.0",
     "simplebar": "^5.3.6",
     "socket.io-client": "^4.8.1",
+    "sockjs-client": "^1.5.2",
+    "stompjs": "^2.3.3",
     "tabulator-tables": "^4.9.3",
     "tiny-slider": "^2.9.3",
     "tippy.js": "^6.2.7",

@@ -6,7 +6,7 @@ export default class User {
   image = null;
   email = null;
   roles = null;
-  rolesPergroups = [];
+  rolesPerProjects = [];
 
   constructor() {}
 
@@ -14,37 +14,40 @@ export default class User {
     return this.first_name ? this.first_name + " " + this.last_name : "User";
   }
 
-  hasRoleInGroup(group, access_roles) {
-    if (!this.rolesPergroups || !Array.isArray(this.rolesPergroups)) {
-      console.log("rolesPergroups is not defined or not an array");
+  hasRoleInGroup(projectShortName, accessRoles) {
+    if (!this.rolesPerProjects || !Array.isArray(this.rolesPerProjects)) {
+      console.log("rolesPerProjects is not defined or not an array");
       return false;
     }
 
-    const groupRoles = this.rolesPergroups.find((g) => g.group === group);
-
-    if (!groupRoles) {
-      console.log(`No matching group found for: ${group}`);
-      return false;
-    }
-
-    if (!groupRoles.roles) {
-      console.log(`No roles array for group: ${group}`);
-      return false;
-    }
-
-    // Ensure access_roles is an array
-    const requiredRoles = Array.isArray(access_roles)
-      ? access_roles
-      : [access_roles];
-
-    // Check if any of the requiredRoles is included in groupRoles
-    const hasAccess = requiredRoles.some((role) =>
-      groupRoles.roles.includes(role)
+    // Find the project by its short name
+    const project = this.rolesPerProjects.find(
+      (p) => p.projectShortName == projectShortName
     );
 
-    console.log(`Checking access for group: ${group}`, {
+    console.log("project is:" + JSON.stringify(project));
+
+    if (!project) {
+      console.log(`No matching project found for: ${projectShortName}`);
+      return false;
+    }
+
+    if (!project.rolePerGroup) {
+      console.log(`No role defined for project: ${projectShortName}`);
+      return false;
+    }
+
+    // Ensure accessRoles is an array
+    const requiredRoles = Array.isArray(accessRoles)
+      ? accessRoles
+      : [accessRoles];
+
+    // Check if the user's role matches any of the required roles
+    const hasAccess = requiredRoles.includes(project.rolePerGroup);
+
+    console.log(`Checking access for project: ${projectShortName}`, {
       requiredRoles,
-      userRoles: groupRoles.roles,
+      userRole: project.role,
       hasAccess,
     });
 

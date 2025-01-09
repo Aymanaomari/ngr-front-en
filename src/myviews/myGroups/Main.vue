@@ -26,8 +26,8 @@
     </div>
     <!-- BEGIN: Users Layout -->
     <div
-      v-for="(faker, fakerKey) in $_.take($f(), 12)"
-      :key="fakerKey"
+      v-for="(project, projectKey) in Projects"
+      :key="projectKey"
       class="intro-y col-span-12 md:col-span-6 lg:col-span-4 xl:col-span-3"
     >
       <div class="box">
@@ -38,11 +38,11 @@
             <img
               alt="Midone - HTML Admin Template"
               class="rounded-md"
-              :src="faker.images[0]"
+              src="#"
             />
             <div class="absolute bottom-0 text-white px-5 pb-6 z-10">
               <a href="" class="block font-medium text-base">{{
-                faker.products[0].name
+                project.longname
               }}</a>
               <div class="flex gap-1 items-center">
                 <span
@@ -59,7 +59,7 @@
         >
           <a
             class="flex items-center text-primary mr-auto cursor-pointer"
-            @click="goToProject()"
+            @click="goToProject(project.shortName)"
           >
             <EyeIcon class="w-4 h-4 mr-1" /> Visite
           </a>
@@ -197,7 +197,13 @@
                   v-for="(visibility, index) in ProjectVisibilities"
                   :key="index"
                 >
-                  <option>{{ visibility }}</option>
+                  <option>
+                    <component
+                      :is="visibility.icon"
+                      class="w-4 h-4 block"
+                    ></component
+                    >{{ visibility.name }}
+                  </option>
                 </template>
               </select>
             </div>
@@ -237,6 +243,8 @@ import { getCategories, getProjectVisibility } from "../../utils/options";
 import { getProjectTypes } from "../../utils/options";
 import { createProposition } from "../../services/registred-user/porposition.service";
 import { create } from "lodash";
+import { getMyProjects } from "../../services/registred-user/project.service";
+import { getUserStore } from "../../stores";
 
 export default {
   data() {
@@ -255,11 +263,12 @@ export default {
       projectTypes: [],
       editorConfig: {
         toolbar: {
-          items: ["bold", "italic", "link"],
+          items: ["bold", "italic", "link", "Buletted List", "Numbered List"],
         },
       },
       editorData: ref("<p>Content of the editor.</p>"),
       ProjectVisibilities: [],
+      Projects: [],
     };
   },
   methods: {
@@ -276,26 +285,39 @@ export default {
         (this.formData.estLogiciel = false),
         (this.formData.description = "");
     },
-    goToProject() {},
+    goToProject(shortName) {
+      this.$router.push(`/project/${shortName}`);
+    },
     Submit() {
       if (
         createProposition({
-          LongName: this.formData.longName,
+          longName: this.formData.longName,
           shortName: this.formData.shortName,
           type: this.formData.type,
           category: this.formData.category,
-          type: this.formData.type,
+          visibility: this.formData.visibility,
           description: this.formData.description,
         })
       ) {
         this.propositionModal = false;
       }
     },
+    fetch() {
+      const list = [];
+      getUserStore().user.rolesPerProjects.forEach((role) => {
+        list.push(role.projectId);
+      });
+      console.log(list);
+      getMyProjects(list).then((res) => {
+        this.Projects = res;
+      });
+    },
   },
   mounted() {
     this.categories = getCategories();
     this.projectTypes = getProjectTypes();
     this.ProjectVisibilities = getProjectVisibility();
+    this.fetch();
   },
 };
 </script>

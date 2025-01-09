@@ -1,7 +1,10 @@
 import ax from "../../utils/axios";
 
 export const createProposition = async (porposition) => {
-  const response = await ax.post("/registred-user/proposition", porposition);
+  const response = await ax.post(
+    "/registred-user/ProjectProposition",
+    porposition
+  );
   if (response.status === 400) {
     console.error("the proposition form not completed");
     return false;

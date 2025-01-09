@@ -24,7 +24,7 @@ export const useUserStore = defineStore({
         me.image = userData.image;
         me.username = userData.username;
         me.roles = userData.roles;
-        me.rolesPergroups = userData.rolesPergroups;
+        me.rolesPerProjects = userData.groups;
 
         this.user = me;
         this.isLoading = false; // Set loading to false after fetching
@@ -43,15 +43,11 @@ export const useUserStore = defineStore({
       me.image = user.image;
       me.username = user.username;
       me.roles = user.roles;
-      me.rolesPergroups = user.rolesPergroups;
+      me.rolesPerProjects = user.rolesPerProjects;
 
       this.user = me;
 
       // Store the user data in sessionStorage
-    },
-    clearUser() {
-      this.user = new User();
-      sessionStorage.removeItem("user");
     },
   },
 });

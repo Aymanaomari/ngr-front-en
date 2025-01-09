@@ -65,7 +65,7 @@
             <td>
               {{ data.id }}
             </td>
-            <td>{{ data.senderId }}</td>
+            <td>{{ data.account.id }}</td>
             <td>{{ data.longName }}</td>
             <td>{{ data.shortName }}</td>
             <td>{{ data.category }}</td>
@@ -170,7 +170,13 @@
           >
             Cancel
           </button>
-          <button type="button" class="btn btn-danger w-24">Reject</button>
+          <button
+            type="button"
+            class="btn btn-danger w-24"
+            @click="rejectProposition(propositionOnReject.id)"
+          >
+            Reject
+          </button>
         </div>
       </ModalBody>
     </Modal>
@@ -198,98 +204,121 @@
           >
             Cancel
           </button>
-          <button type="button" class="btn btn-success w-24">Accept</button>
+          <button
+            type="button"
+            class="btn btn-success w-24"
+            @click="acceptProposition(propositionOnAccept.id)"
+          >
+            Accept
+          </button>
         </div>
       </ModalBody>
     </Modal>
     <!-- END: Accept Confirmation Modal -->
-  </div>
 
-  <!-- BEGIN: show more Modal Content -->
-  <Modal :show="showModal" @hidden="showModal = false" size="modal-xl">
-    <ModalHeader class="text-center justify-center">
-      <h2 class="font-medium text-2xl text-center">Proposition Details</h2>
-    </ModalHeader>
-    <ModalBody class="grid grid-cols-12 gap-4">
-      <div class="flex flex-col gap-1 col-span-12">
-        <div class="form-container">
-          <div class="">
-            <label for="regular-form-1" class="form-label">Long Name:</label>
-            <input
-              id="regular-form-1"
-              type="text"
-              class="form-control"
-              v-model="propositionOnshowMore.longName"
-              placeholder="Input text"
-              disabled
-            />
-          </div>
-          <div class="mt-2">
-            <label for="regular-form-1" class="form-label">Short Name:</label>
-            <input
-              id="regular-form-1"
-              type="text"
-              class="form-control"
-              v-model="propositionOnshowMore.shortName"
-              placeholder="Input text"
-              disabled
-            />
-          </div>
-          <div class="mt-2">
-            <label for="regular-form-1" class="form-label">Category:</label>
-            <input
-              type="text"
-              class="form-control"
-              v-model="propositionOnshowMore.category"
-              disabled
-            />
-          </div>
-          <div class="mt-2">
-            <label for="regular-form-1" class="form-label">Type:</label>
-            <input
-              type="text"
-              class="form-control"
-              aria-label="Default select example"
-              v-model="propositionOnshowMore.type"
-              disabled
-            />
-          </div>
-          <div class="mt-2">
-            <label for="regular-form-1" class="form-label">Visibility:</label>
-            <input
-              type="text"
-              class="form-control"
-              aria-label="Default select example"
-              v-model="propositionOnshowMore.status"
-              disabled
-            />
-          </div>
+    <!-- BEGIN: show more Modal Content -->
+    <Modal :show="showModal" @hidden="showModal = false" size="modal-xl">
+      <ModalHeader class="text-center justify-center">
+        <h2 class="font-medium text-2xl text-center">Proposition Details</h2>
+      </ModalHeader>
+      <ModalBody class="grid grid-cols-12 gap-4">
+        <div class="flex flex-col gap-1 col-span-12">
+          <div class="form-container">
+            <div class="">
+              <label for="regular-form-1" class="form-label">Account id:</label>
+              <input
+                id="regular-form-1"
+                type="text"
+                class="form-control"
+                v-model="propositionOnshowMore.account.id"
+                placeholder="Input text"
+                disabled
+              />
+            </div>
+            <div class="mt-2">
+              <label for="regular-form-1" class="form-label">Long Name:</label>
+              <input
+                id="regular-form-1"
+                type="text"
+                class="form-control"
+                v-model="propositionOnshowMore.longName"
+                placeholder="Input text"
+                disabled
+              />
+            </div>
+            <div class="mt-2">
+              <label for="regular-form-1" class="form-label">Short Name:</label>
+              <input
+                id="regular-form-1"
+                type="text"
+                class="form-control"
+                v-model="propositionOnshowMore.shortName"
+                placeholder="Input text"
+                disabled
+              />
+            </div>
+            <div class="mt-2">
+              <label for="regular-form-1" class="form-label">Category:</label>
+              <input
+                type="text"
+                class="form-control"
+                v-model="propositionOnshowMore.category"
+                disabled
+              />
+            </div>
+            <div class="mt-2">
+              <label for="regular-form-1" class="form-label">Type:</label>
+              <input
+                type="text"
+                class="form-control"
+                aria-label="Default select example"
+                v-model="propositionOnshowMore.type"
+                disabled
+              />
+            </div>
+            <div class="mt-2">
+              <label for="regular-form-1" class="form-label">Visibility:</label>
+              <input
+                type="text"
+                class="form-control"
+                aria-label="Default select example"
+                v-model="propositionOnshowMore.status"
+                disabled
+              />
+            </div>
 
-          <div class="mt-3">
-            <label>Description</label>
-            <div
-              class="mt-2 proposition__show-modal text-center border-2 p-2 border-gray-200 rounded-lg"
-              v-html="propositionOnshowMore.description"
-            ></div>
-          </div>
-          <div class="flex justify-between mt-10">
-            <button
-              class="btn btn-secondary w-32 mr-1 mb-2"
-              @click="showModal = false"
-            >
-              Close
-            </button>
+            <div class="mt-3">
+              <label>Description</label>
+              <div
+                class="mt-2 proposition__show-modal text-center border-2 p-2 border-gray-200 rounded-lg"
+                v-html="propositionOnshowMore.description"
+              ></div>
+            </div>
+            <div class="flex justify-between mt-10">
+              <button
+                class="btn btn-secondary w-32 mr-1 mb-2"
+                @click="showModal = false"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </ModalBody>
-  </Modal>
-  <!-- END: Modal Content -->
+      </ModalBody>
+    </Modal>
+    <!-- END: Modal Content -->
+  </div>
+
   <!-- Modal and other modals... -->
 </template>
 
 <script>
-import { PaginatePropositions } from "../../services/admin/propositionGestion.service";
+import {
+  PaginatePropositions,
+  getAllPendingProspositions,
+  acceptProposition as acceptPropositionService,
+  rejectProposition as rejectPropositionService,
+} from "../../services/admin/propositionGestion.service";
 import { ref } from "vue";
 
 export default {
@@ -302,7 +331,16 @@ export default {
       propositionsPerPage: 10,
       searchQuery: "",
       propositions: [], // Start with an empty array
-      propositionOnshowMore: {},
+      propositionOnshowMore: {
+        longName: "",
+        shortName: "",
+        category: "",
+        visibility: "",
+        description: "",
+        account: {
+          id: "",
+        },
+      },
       propositionOnAccept: {},
       propositionOnReject: {},
     };
@@ -349,8 +387,15 @@ export default {
       //   .catch((error) => {
       //     console.error("Error fetching propositions:", error);
       //   });
-      this.propositions = PaginatePropositions();
-      console.log("propositions:" + JSON.stringify(this.propositions));
+
+      getAllPendingProspositions()
+        .then((response) => {
+          console.log("response:" + JSON.stringify(response.data));
+          this.propositions = response.data;
+        })
+        .catch((error) => {
+          console.error("Error fetching propositions:", error);
+        });
     },
     showMore(data) {
       this.propositionOnshowMore = data;
@@ -363,6 +408,30 @@ export default {
     reject(data) {
       this.propositionOnReject = data;
       this.rejectConfirmationModal = true;
+    },
+    acceptProposition(id) {
+      console.log("accepting proposition with id: " + id);
+      acceptPropositionService(id).then((response) => {
+        if (response.status == 202) {
+          console.log("the proposition has been accepted successfully");
+          this.acceptConfirmationModal = false;
+        } else {
+          console.log("error accepting the proposition");
+        }
+        this.fetchPropositions();
+      });
+    },
+    rejectProposition(id) {
+      console.log("rejecting proposition with id: " + id);
+      rejectPropositionService(id).then((response) => {
+        if (response.status == 202) {
+          console.log("the proposition has been rejected successfully");
+          this.rejectConfirmationModal = false;
+        } else {
+          console.log("error rejecting the proposition");
+        }
+        this.fetchPropositions();
+      });
     },
   },
   mounted() {

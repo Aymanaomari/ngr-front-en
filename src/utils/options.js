@@ -1,3 +1,5 @@
+import { icons } from "lucide";
+
 export const getCategories = () => {
   return [
     "E-Commerce",
@@ -25,9 +27,18 @@ export const getCategories = () => {
 };
 
 export const getProjectTypes = () => {
-  return ["LOGICIEL", "NON LOGICIEL"];
+  return ["LOGICIEL", "NON_LOGICIEL"];
 };
 
 export const getProjectVisibility = () => {
-  return ["PUBLIC", "PRIVATE"];
+  return [
+    {
+      name: "PUBLIC",
+      icon: "GlobIcon",
+    },
+    {
+      name: "PRIVATE",
+      icon: "LockIcon",
+    },
+  ];
 };

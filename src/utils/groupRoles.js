@@ -1,6 +1,6 @@
 const RolesPerGroup = {
-  MEMBER: "member",
-  GROUPADMIN: "group admin",
+  MEMBER: "MEMBER",
+  ADMIN: "ADMIN",
 };
 
 export default RolesPerGroup;

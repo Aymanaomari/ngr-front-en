@@ -497,7 +497,7 @@
       <div class="text-center text-xs mt-2">GitlabIcon</div>
     </div>
     <div class="col-span-6 sm:col-span-3 lg:col-span-2 xl:col-span-1">
-      <GlobeIcon class="block mx-auto" />
+      <eIconGlob class="block mx-auto" />
       <div class="text-center text-xs mt-2">GlobeIcon</div>
     </div>
     <div class="col-span-6 sm:col-span-3 lg:col-span-2 xl:col-span-1">

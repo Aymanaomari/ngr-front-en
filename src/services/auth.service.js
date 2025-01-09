@@ -7,18 +7,20 @@ import { useSideMenuStore } from "../stores/side-menu.js";
 import RolesPerGroup from "../utils/groupRoles.js";
 import { useProjectMenuStore } from "../stores/project-menu.js";
 import router from "../router/index.js";
-import { ax2 } from "../utils/axios.js";
 
 export const login = async (email, password) => {
   try {
-    const response = await ax2.post("/auth/login", {
+    const response = await ax.post("/auth/login", {
       email: email,
       password: password,
     });
+
     if (response.status === 202) {
       const token = response.headers["authorization"];
-      console.log(response);
+      console.log("Login successful:", response);
+
       sessionStorage.setItem("token", token);
+
       const user = new User();
       user.email = response.data.email;
       user.roles = response.data.role;
@@ -26,8 +28,18 @@ export const login = async (email, password) => {
       user.last_name = response.data.user.lastName;
       user.username = user.first_name + " " + user.last_name;
       user.id = response.data.user.id;
+      user.rolesPerProjects = response.data.groups;
       getUserStore().setMe(user);
-      router.replace("/");
+
+      const redirectPath = localStorage.getItem("redirectAfterLogin");
+      if (redirectPath) {
+        localStorage.removeItem("redirectAfterLogin");
+        console.log("Redirecting to stored route:", redirectPath);
+        router.push(redirectPath);
+      } else {
+        console.log("No stored route, redirecting to default route");
+        router.push("/");
+      }
     } else {
       console.error("Unexpected response status:", response.status);
     }

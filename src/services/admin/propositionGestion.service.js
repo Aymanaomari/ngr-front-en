@@ -1,3 +1,5 @@
+import ax from "../../utils/axios";
+
 export const PaginatePropositions = () => {
   return [
     {
@@ -141,4 +143,16 @@ export const PaginatePropositions = () => {
         `,
     },
   ];
+};
+
+export const getAllPendingProspositions = async () => {
+  return await ax.get("/admin/PendingPropositions");
+};
+
+export const acceptProposition = async (id) => {
+  return await ax.post(`/admin/ApproveProposition/${id}`);
+};
+
+export const rejectProposition = async (id) => {
+  return await ax.post(`/admin/RejectProposition/${id}`);
 };

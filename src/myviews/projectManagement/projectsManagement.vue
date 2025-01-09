@@ -28,7 +28,7 @@
           <tr>
             <th class="whitespace-nowrap">Nom long</th>
             <th class="whitespace-nowrap">Nom court</th>
-            <th class="whitespace-nowrap">Theme</th>
+            <th class="whitespace-nowrap">Category</th>
             <th class="whitespace-nowrap">Type</th>
             <th class="whitespace-nowrap">Visibilite</th>
             <th class="whitespace-nowrap">Created at</th>
@@ -41,17 +41,17 @@
             :key="index"
             class="h-14 table-report"
           >
-            <td>{{ project.nom_long }}</td>
-            <td>{{ project.nom_court }}</td>
-            <td>{{ project.theme }}</td>
+            <td>{{ project.longname }}</td>
+            <td>{{ project.shortName }}</td>
+            <td>{{ project.category }}</td>
             <td>{{ project.type }}</td>
-            <td>{{ project.visibilite }}</td>
-            <td>{{ project.created_date }}</td>
+            <td>{{ project.visibility }}</td>
+            <td>{{ formatDate(project.createdAt) }}</td>
             <td class="table-report__action w-56">
               <div class="flex gap-3">
                 <RouterLink
                   class="flex items-center text-primary cursor-pointer"
-                  :to="`/project/${project.nom_long}`"
+                  :to="`/project/${project.shortName}`"
                 >
                   <EyeIcon class="w-4 h-4 mr-1" />
                   Visit
@@ -121,8 +121,8 @@
 
 <script>
 import { RouterLink } from "vue-router";
-import { getProjects } from "../../services/fake/projects.service";
-
+import { paginateProjects as paginatedProjectService } from "../../services/admin/projectGestion.service";
+import { formatDate as formatDateUtil } from "../../utils/date";
 export default {
   data() {
     return {
@@ -131,7 +131,7 @@ export default {
       currentPage: 1,
       projectsPerPage: 10,
       searchQuery: "",
-      projects: getProjects(),
+      projects: [],
     };
   },
   computed: {
@@ -152,7 +152,7 @@ export default {
     },
     filteredProjects() {
       return this.projects.filter((project) =>
-        project.nom_long.toLowerCase().includes(this.searchQuery.toLowerCase())
+        project.longname.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     },
     paginatedProjects() {
@@ -170,6 +170,24 @@ export default {
     showEdit(project) {
       this.projectOnEdit = project;
     },
+    formatDate(date) {
+      return formatDateUtil(date);
+    },
+    fetchProjects() {
+      paginatedProjectService(this.currentPage - 1, this.projectsPerPage).then(
+        (response) => {
+          if (response.status === 200) {
+            this.projects = response.data.content;
+            console.log(this.projects);
+          } else {
+            console.error("Error while fetching projects");
+          }
+        }
+      );
+    },
+  },
+  mounted() {
+    this.fetchProjects();
   },
 };
 </script>

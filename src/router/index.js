@@ -4,7 +4,6 @@ import TopMenu from "../layouts/top-menu/Main.vue";
 import DashboardOverview2 from "../views/dashboard-overview-2/Main.vue";
 import Login from "../myviews/login/Main.vue";
 import Register from "../myviews/register/Main.vue";
-import ErrorPage from "../views/error-page/Main.vue";
 import SimpleMenu from "../layouts/simple-menu/Main.vue";
 /*my views*/
 
@@ -22,6 +21,9 @@ import globalChatContent from "../myviews/projectChat/globalChatContent/Main.vue
 import subGroupChatContent from "../myviews/projectChat/subGroupChatContent/Main.vue";
 import userDashboard from "../myviews/userDashboard/Main.vue";
 import myGroups from "../myviews/myGroups/Main.vue";
+import ErrorPage from "../myviews/error-page/Main.vue";
+import ProjectUserManagement from "../myviews/projectUserManagement/Main.vue";
+
 /*services*/
 import Roles from "../utils/roles";
 import RolesPerGroup from "../utils/groupRoles";
@@ -111,7 +113,7 @@ const routes = [
             path: "",
             meta: {
               meta: { authorize: [Roles.REGISTRED_USER, Roles.ADMIN] },
-              groupAuthorize: [RolesPerGroup.GROUPADMIN, RolesPerGroup.MEMBER],
+              groupAuthorize: [RolesPerGroup.ADMIN, RolesPerGroup.MEMBER],
             },
           },
           {
@@ -120,7 +122,7 @@ const routes = [
             component: profjectFileManager,
             meta: {
               meta: { authorize: [Roles.REGISTRED_USER, Roles.ADMIN] },
-              groupAuthorize: [RolesPerGroup.GROUPADMIN, RolesPerGroup.MEMBER],
+              groupAuthorize: [RolesPerGroup.ADMIN, RolesPerGroup.MEMBER],
             },
           },
           {
@@ -128,7 +130,7 @@ const routes = [
             component: projectChat,
             meta: {
               meta: { authorize: [Roles.REGISTRED_USER, Roles.ADMIN] },
-              groupAuthorize: [RolesPerGroup.GROUPADMIN, RolesPerGroup.MEMBER],
+              groupAuthorize: [RolesPerGroup.ADMIN, RolesPerGroup.MEMBER],
             },
             children: [
               {
@@ -151,6 +153,15 @@ const routes = [
                 }),
               },
             ],
+          },
+          {
+            path: "/UsersManagement",
+            name: "UsersManagement",
+            component: ProjectUserManagement,
+            meta: {
+              meta: { authorize: [Roles.REGISTRED_USER, Roles.ADMIN] },
+              groupAuthorize: [RolesPerGroup.ADMIN],
+            },
           },
         ],
       },
@@ -198,11 +209,17 @@ router.beforeEach(async (to, from, next) => {
   const defaultPages = ["/"];
   const { authorize, groupAuthorize } = to.meta;
 
-  // Check if the user is logged in
   const isAuthenticated = isLogin();
   const userStore = getUserStore();
 
-  // Fetch user information if the token exists but the store is empty
+  // Save the target route before redirecting to login
+  if (authRequired && !isAuthenticated) {
+    console.log("User is not logged in");
+    localStorage.setItem("redirectAfterLogin", to.fullPath);
+    return next({ path: "/login" });
+  }
+
+  // Fetch user data if authenticated and store is empty
   if (isAuthenticated && !userStore.user.id) {
     try {
       console.log("Fetching user data...");
@@ -214,71 +231,61 @@ router.beforeEach(async (to, from, next) => {
       user.last_name = response.data.user.lastName;
       user.username = user.first_name + " " + user.last_name;
       user.id = response.data.user.id;
-      getUserStore().setMe(user);
+      user.rolesPerProjects = response.data.groups;
+      userStore.setMe(user);
       console.log("User data fetched successfully:", response.data);
     } catch (error) {
       console.error("Error fetching user data:", error);
-      // Optionally, log the user out or redirect to login
       return next({ path: "/login" });
     }
   }
 
-  // Redirect unauthenticated users to login for protected routes
-  if (authRequired && !isAuthenticated) {
-    console.log("User is not logged in");
-    return next({ path: "/login" });
+  // Redirect to stored route after login
+  if (isAuthenticated && to.path === "/login") {
+    const redirectPath = localStorage.getItem("redirectAfterLogin");
+    localStorage.removeItem("redirectAfterLogin"); // Clear the stored route
+    if (redirectPath) {
+      console.log("Redirecting to previously intended route:", redirectPath);
+      return next({ path: redirectPath });
+    }
+    return next({ path: "/dashboard" }); // Default route after login
   }
 
-  console.log("User is logged in");
-
-  // Redirect logged-in users from root ("/") based on their role
+  // Handle default pages based on roles
   if (isAuthenticated && defaultPages.includes(to.path)) {
     const userRole = userStore.user.roles;
 
     if (userRole === Roles.ADMIN) {
-      console.log("Redirecting admin user");
       return next({ path: "/Admin/dashboard" });
     }
-
-    console.log("Redirecting non-admin user");
     return next({ path: "/dashboard" });
   }
 
-  // Check specific route authorization
+  // Authorization checks
   if (authorize) {
     const userRoles = userStore.user.roles;
-
     if (!userRoles || !authorize.includes(userRoles)) {
-      console.log("User is not authorized for this route");
       return next({ path: "/" });
     }
-
-    // Generate menu if necessary
-    console.log("User is authorized for this route");
     useTopMenuStore().generateMenu();
   }
 
-  // Check group authorization
   if (groupAuthorize) {
     const groupName = to.params.name;
-    console.log("Group name:", groupName);
-
     const userHasAccess =
       userStore.user.hasAnyRole([Roles.ADMIN]) ||
       userStore.user.hasRoleInGroup(groupName, groupAuthorize);
 
     if (!userHasAccess) {
-      console.log(`User is not authorized for group: ${groupName}`);
+      console.log("User does not have access to this group:", groupName);
       return next({ path: "/" });
     }
-
-    // Generate menus for group-specific pages
-    console.log("User is authorized for the group");
+    console.log("User has access to this group:", groupName);
     useProjectMenuStore().generateMenu(groupName);
     useTopMenuStore().menu = [];
   }
 
-  // Allow navigation to the requested route
+  // Allow navigation
   next();
 });
 

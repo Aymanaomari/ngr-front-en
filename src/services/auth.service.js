@@ -1,5 +1,5 @@
 import User from "../model/user.js";
-import { getAuthStore, getUserStore } from "../stores/index.js";
+import { getUserStore } from "../stores/index.js";
 import Roles from "../utils/roles.js";
 import ax from "../utils/axios";
 import { useTopMenuStore } from "../stores/top-menu.js";
@@ -126,7 +126,7 @@ export const logout = async () => {
   //     router.replace("/login");
   //   });
   getUserStore().clearUser();
-  getAuthStore().clearToken();
+  // getAuthStore().clearToken();
   sessionStorage.removeItem("token");
   router.replace("/login");
 };

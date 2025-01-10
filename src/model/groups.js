@@ -1,1 +1,6 @@
-export default class Group {}
+export default class Group {
+  id = null;
+  name = null;
+  accounts = [];
+  constructor() {}
+}

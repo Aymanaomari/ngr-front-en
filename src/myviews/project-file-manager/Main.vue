@@ -249,3 +249,26 @@
     </div>
   </div>
 </template>
+
+<script>
+import { getProject } from "../../services/project/project.service";
+export default {
+  name: "projectDeportManager",
+  data() {
+    return {
+      srcDepot: null,
+      webDeport: null,
+    };
+  },
+  methods: {
+    fetch() {
+      getProject().then((data) => {
+        this.srcDepot=data.ressrouceProject.
+      });
+    },
+  },
+  mounted() {
+    this.fetch();
+  },
+};
+</script>

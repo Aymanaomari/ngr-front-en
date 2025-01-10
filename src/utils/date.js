@@ -45,16 +45,17 @@ export const calculateTimeDifference = (sentTime) => {
   return `${days} day${days !== 1 ? "s" : ""}`;
 };
 
-export const formatDate = (createdAt) => {
-  if (!Array.isArray(createdAt) || createdAt.length < 6) {
-    throw new Error("Invalid date format");
+export const formatDate = (timestamp) => {
+  if (typeof timestamp !== "number") {
+    throw new Error("Invalid date format: timestamp should be a number.");
   }
 
-  const [year, month, day, hour, minute, second] = createdAt;
+  // Convert the timestamp from seconds to milliseconds (JavaScript works with milliseconds)
+  const milliseconds = Math.floor(timestamp * 1000);
 
-  // JavaScript's Date object uses 0-based indexing for months
-  const date = new Date(year, month - 1, day, hour, minute, second);
+  // Create a new Date object
+  const date = new Date(milliseconds);
 
   // Format the date as a readable string
-  return date.toLocaleString(); // You can customize options for formatting
+  return date.toLocaleString(); // Customize options as needed
 };

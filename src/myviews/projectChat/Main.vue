@@ -108,10 +108,11 @@
 <script>
 import { RouterView } from "vue-router";
 import router from "../../router";
-import { getUserStore } from "../../stores";
+import { getProjectStore, getUserStore } from "../../stores";
 import Roles from "../../utils/roles";
 import { getfakeUsersProjects } from "../../services/fake/projectMembers.service";
 import RolesPerGroup from "../../utils/groupRoles";
+import { getProject as getProjectService } from "../../services/project/project.service";
 
 export default {
   data() {
@@ -167,6 +168,11 @@ export default {
     goToPersonal(id) {
       this.$router.push({ name: "personalChat", params: { userId: id } });
     },
+    fetch() {
+      getProjectService(this.$route.params.name).then((response) => {
+        console.log(response);
+      });
+    },
   },
 
   computed: {
@@ -180,6 +186,7 @@ export default {
   mounted() {
     this.projectData = getfakeUsersProjects();
     this.user = getUserStore().user.id;
+    this.fetch();
   },
 };
 </script>

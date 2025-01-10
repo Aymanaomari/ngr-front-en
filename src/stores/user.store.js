@@ -49,5 +49,11 @@ export const useUserStore = defineStore({
 
       // Store the user data in sessionStorage
     },
+    async clearUser() {
+      // Clear the user data from the store
+      this.user = new User();
+      // Clear the user data from the sessionStorage
+      // Redirect the user to the login page
+    },
   },
 });

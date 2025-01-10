@@ -309,6 +309,8 @@ export default {
       });
       console.log(list);
       getMyProjects(list).then((res) => {
+        const myProjects = res;
+        getUserStore().user.m;
         this.Projects = res;
       });
     },

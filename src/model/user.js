@@ -7,6 +7,7 @@ export default class User {
   email = null;
   roles = null;
   rolesPerProjects = [];
+  mygroups = [];
 
   constructor() {}
 

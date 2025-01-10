@@ -43,9 +43,7 @@ export const useProjectMenuStore = defineStore("ProjectMenu", {
       } else {
         // Build the final menu based on roles
         this.menu = [
-          ...(user.hasRoleInGroup(group, RolesPerGroup.GROUPADMIN)
-            ? adminMenu
-            : []),
+          ...(user.hasRoleInGroup(group, RolesPerGroup.ADMIN) ? adminMenu : []),
           ...(user.hasRoleInGroup(group, RolesPerGroup.MEMBER) ? userMenu : []),
         ];
       }

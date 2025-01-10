@@ -49,12 +49,16 @@ import { nestedMenu } from "@/layouts/side-menu";
 import dom from "@left4code/tw-starter/dist/js/dom";
 import { useRoute, useRouter } from "vue-router";
 import router from "../../router";
+import Project from "../../model/project";
+import { getProjectStore } from "../../stores";
+
 export default {
   name: "YourComponent",
 
   data() {
     return {
       formattedMenu: [],
+      Project: null,
     };
   },
 

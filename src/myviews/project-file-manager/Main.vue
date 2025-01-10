@@ -6,12 +6,21 @@
       <div class="intro-y box p-5 mt-6">
         <div class="mt-1">
           <a
-            href=""
-            class="flex items-center px-3 py-2 rounded-md bg-primary text-white font-medium"
+            @click.prevent="changeChoice('src')"
+            class="flex items-center px-3 py-2 rounded-md cursor-pointer"
+            :class="{
+              'bg-primary text-white font-medium': choice == 'src',
+            }"
           >
             <FolderIcon class="w-4 h-4 mr-2" /> Src
           </a>
-          <a href="" class="flex items-center px-3 py-2 mt-2 rounded-md">
+          <a
+            @click.prevent="changeChoice('web')"
+            class="flex items-center px-3 py-2 mt-2 rounded-md cursor-pointer"
+            :class="{
+              'bg-primary text-white font-medium': choice == 'web',
+            }"
+          >
             <GlobeIcon class="w-4 h-4 mr-2" /> Web
           </a>
         </div>
@@ -30,128 +39,42 @@
             class="form-control w-full sm:w-64 box px-10"
             placeholder="Search files"
           />
-          <Dropdown
-            class="inbox-filter absolute inset-y-0 mr-3 right-0 flex items-center"
-            placement="bottom-start"
-          >
-            <DropdownToggle
-              tag="a"
-              role="button"
-              class="w-4 h-4 block"
-              href="javascript:;"
-            >
-              <ChevronDownIcon class="w-4 h-4 cursor-pointer text-slate-500" />
-            </DropdownToggle>
-            <DropdownMenu class="inbox-filter__dropdown-menu pt-2">
-              <DropdownContent tag="div">
-                <div class="grid grid-cols-12 gap-4 gap-y-3 p-3">
-                  <div class="col-span-6">
-                    <label for="input-filter-1" class="form-label text-xs"
-                      >File Name</label
-                    >
-                    <input
-                      id="input-filter-1"
-                      type="text"
-                      class="form-control flex-1"
-                      placeholder="Type the file name"
-                    />
-                  </div>
-                  <div class="col-span-6">
-                    <label for="input-filter-2" class="form-label text-xs"
-                      >Shared With</label
-                    >
-                    <input
-                      id="input-filter-2"
-                      type="text"
-                      class="form-control flex-1"
-                      placeholder="example@gmail.com"
-                    />
-                  </div>
-                  <div class="col-span-6">
-                    <label for="input-filter-3" class="form-label text-xs"
-                      >Created At</label
-                    >
-                    <input
-                      id="input-filter-3"
-                      type="text"
-                      class="form-control flex-1"
-                      placeholder="Important Meeting"
-                    />
-                  </div>
-                  <div class="col-span-6">
-                    <label for="input-filter-4" class="form-label text-xs"
-                      >Size</label
-                    >
-                    <select id="input-filter-4" class="form-select flex-1">
-                      <option>10</option>
-                      <option>25</option>
-                      <option>35</option>
-                      <option>50</option>
-                    </select>
-                  </div>
-                  <div class="col-span-12 flex items-center mt-3">
-                    <button class="btn btn-secondary w-32 ml-auto">
-                      Create Filter
-                    </button>
-                    <button class="btn btn-primary w-32 ml-2">Search</button>
-                  </div>
-                </div>
-              </DropdownContent>
-            </DropdownMenu>
-          </Dropdown>
         </div>
         <div class="w-full sm:w-auto flex">
           <button class="btn btn-primary shadow-md mr-2">
             Upload New Files
           </button>
-          <Dropdown>
-            <DropdownToggle class="btn px-2 box">
-              <span class="w-5 h-5 flex items-center justify-center">
-                <PlusIcon class="w-4 h-4" />
-              </span>
-            </DropdownToggle>
-            <DropdownMenu class="w-40">
-              <DropdownContent>
-                <DropdownItem>
-                  <FileIcon class="w-4 h-4 mr-2" /> Share Files
-                </DropdownItem>
-                <DropdownItem>
-                  <SettingsIcon class="w-4 h-4 mr-2" /> Settings
-                </DropdownItem>
-              </DropdownContent>
-            </DropdownMenu>
-          </Dropdown>
+          <button
+            class="btn btn-primary shadow-md mr-2"
+            @click="showCreateModal = true"
+          >
+            Create new Folder
+          </button>
         </div>
       </div>
       <!-- END: File Manager Filter -->
       <!-- BEGIN: Directory & Files -->
       <div class="intro-y grid grid-cols-12 gap-3 sm:gap-6 mt-5">
         <div
-          v-for="(faker, fakerKey) in $f()"
-          :key="fakerKey"
+          v-for="(folder, index) in Folders"
+          :key="index"
           class="intro-y col-span-6 sm:col-span-4 md:col-span-3 2xl:col-span-2"
         >
           <div
             class="file box rounded-md px-5 pt-8 pb-5 px-3 sm:px-5 relative zoom-in"
           >
-            <div class="absolute left-0 top-0 mt-3 ml-3">
-              <input
-                class="form-check-input border border-slate-500"
-                type="checkbox"
-                :checked="faker.trueFalse[0]"
-              />
-            </div>
+            <div class="absolute left-0 top-0 mt-3 ml-3"></div>
             <a
-              v-if="faker.files[0].type == 'Empty Folder'"
+              v-if="isEmptyFolder(folder)"
               href=""
               class="w-3/5 file__icon file__icon--empty-directory mx-auto"
             ></a>
             <a
-              v-else-if="faker.files[0].type == 'Folder'"
-              href=""
+              v-else-if="!isEmptyFolder(folder)"
+              @click.prevent=""
               class="w-3/5 file__icon file__icon--directory mx-auto"
             ></a>
-            <a
+            <!-- <a
               v-else-if="faker.files[0].type == 'Image'"
               href=""
               class="w-3/5 file__icon file__icon--image mx-auto"
@@ -172,9 +95,9 @@
               faker.files[0].fileName.split("/")[
                 faker.files[0].fileName.split("/").length - 1
               ]
-            }}</a>
+            }}</a>-->
             <div class="text-slate-500 text-xs text-center mt-0.5">
-              {{ faker.files[0].size }}
+              {{ folder.name }}
             </div>
             <Dropdown class="absolute top-0 right-0 mr-2 mt-3 ml-auto">
               <DropdownToggle tag="a" class="w-5 h-5 block" href="javascript:;">
@@ -185,8 +108,9 @@
                   <DropdownItem>
                     <UsersIcon class="w-4 h-4 mr-2" /> Share File
                   </DropdownItem>
-                  <DropdownItem>
-                    <TrashIcon class="w-4 h-4 mr-2" /> Delete
+                  <DropdownItem @click="deleteFolderModal(folder.id)">
+                    <TrashIcon class="w-4 h-4 mr-2" />
+                    Delete
                   </DropdownItem>
                 </DropdownContent>
               </DropdownMenu>
@@ -248,23 +172,169 @@
       <!-- END: Pagination -->
     </div>
   </div>
+
+  <!--BEGIN: create Modal-->
+  <Modal :show="showCreateModal" @hidden="showCreateModal = false">
+    <ModalBody class="pt-10 pb-5 px-10">
+      <div>
+        <label for="regular-form-1" class="form-label">Name</label>
+        <input
+          id="regular-form-1"
+          type="text"
+          class="form-control"
+          placeholder="choose A name"
+          v-model="newFolderName"
+        />
+        <div class="text-base text-danger">{{ error }}</div>
+        <div class="flex w-100 justify-between px-1 pt-5">
+          <button
+            class="btn mt-2 bg-gray-200 w-36"
+            @click="showCreateModal = false"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn btn-primary mt-2 w-36"
+            @click="createFolder(newFolderName)"
+          >
+            Submit
+          </button>
+        </div>
+      </div>
+    </ModalBody>
+  </Modal>
+  <!--End : create Modal-->
+
+  <!-- BEGIN: Modal Content -->
+  <Modal
+    :show="deleteModalPreview"
+    @hidden="
+      deleteModalPreview = false;
+      folderOnDelete = null;
+    "
+  >
+    <ModalBody class="p-0">
+      <div class="p-5 text-center">
+        <XCircleIcon class="w-16 h-16 text-danger mx-auto mt-3" />
+        <div class="text-3xl mt-5">Are you sure?</div>
+        <div class="text-slate-500 mt-2">
+          Do you really want to delete these Folder? <br />This process cannot
+          be undone.
+        </div>
+      </div>
+      <div class="px-5 pb-8 text-center">
+        <button
+          type="button"
+          @click="
+            deleteModalPreview = false;
+            folderOnDelete = null;
+          "
+          class="btn btn-outline-secondary w-24 mr-1"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger w-24"
+          @click="deleteFolder()"
+        >
+          Delete
+        </button>
+      </div>
+    </ModalBody>
+  </Modal>
+  <!-- END: Modal Content -->
 </template>
 
 <script>
-import { getProject } from "../../services/project/project.service";
+import { isEmpty } from "lodash";
+import {
+  getProject,
+  createFolder as createFolderService,
+  deleteFolder as deleteFolderService,
+} from "../../services/project/project.service";
+
 export default {
   name: "projectDeportManager",
   data() {
     return {
-      srcDepot: null,
-      webDeport: null,
+      srcDepot: {
+        id: null,
+        type: null,
+        nom: null,
+        localPath: null,
+        folders: [],
+      },
+      webDepot: {
+        id: null,
+        type: null,
+        nom: null,
+        localPath: null,
+        folders: [],
+      },
+      choice: "src",
+      showCreateModal: false,
+      newFolderName: null,
+      error: null,
+      deleteModalPreview: false,
+      folderOnDelete: null,
     };
+  },
+  computed: {
+    Folders() {
+      if (this.choice == "src") {
+        return this.srcDepot.folders;
+      }
+      if (this.choice == "web") {
+        return this.webDepot.folders;
+      }
+    },
   },
   methods: {
     fetch() {
-      getProject().then((data) => {
-        this.srcDepot=data.ressrouceProject.
+      getProject(this.$route.params.name, true).then((data) => {
+        this.srcDepot = data.ressrouceProject.srcDepot;
+        this.webDepot = data.ressrouceProject.webDepot;
       });
+    },
+    changeChoice(Value) {
+      this.choice = Value;
+    },
+    createFolder() {
+      const DepotId =
+        this.choice == "src" ? this.srcDepot.id : this.webDepot.id;
+      createFolderService(DepotId, this.newFolderName, null).then(
+        (response) => {
+          if (response.status == 201) {
+            console.log("hello");
+            this.fetch();
+            this.showCreateModal = false;
+          } else {
+            this.error = "cannot create the folder";
+            console.error("the folder has not been created");
+          }
+        }
+      );
+    },
+    deleteFolder() {
+      deleteFolderService(this.folderOnDelete).then((response) => {
+        if (response.status == 202) {
+          this.fetch();
+          this.folderOnDelete = null;
+          this.deleteModalPreview = false;
+        }
+      });
+    },
+    isEmptyFolder(folder) {
+      if (folder.subFolders.length == 0 && folder.files.length == 0) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    deleteFolderModal(id) {
+      this.folderOnDelete = id;
+      this.deleteModalPreview = true;
     },
   },
   mounted() {

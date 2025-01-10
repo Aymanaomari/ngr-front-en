@@ -5,14 +5,20 @@ import Depot from "../../model/depot";
 import ressourceProject from "../../model/ressourceProject";
 import { getProjectStore } from "../../stores";
 
-export const getProject = async (shortname) => {
+export const getProject = async (shortname, force = false) => {
   try {
     const cachedProject = getProjectStore().project;
-    if (cachedProject != null && cachedProject.shortName == shortname) {
+    if (
+      cachedProject != null &&
+      cachedProject.shortName == shortname &&
+      force == false
+    ) {
       return cachedProject;
     }
     console.log("before fetching");
-    const response = await ax.get(`/registred-user/project?shortName=test`);
+    const response = await ax.get(
+      `/registred-user/project?shortName=${shortname}`
+    );
 
     const projectData = response.data;
     if (!projectData) throw new Error("Invalid project data received");
@@ -71,5 +77,30 @@ export const getProject = async (shortname) => {
     console.error("Failed to fetch project:", error);
     console.log("short name is:" + shortname);
     throw new Error("Unable to fetch project data.");
+  }
+};
+
+export const createFolder = async (depotId, name, parentFolderId = null) => {
+  console.log(
+    "create the folder with depot id:" + depotId + " and name:" + name
+  );
+  return await ax.post("/registred-user/project/depot/create-folder", {
+    depotId: depotId,
+    name: name,
+    parentFolderId: parentFolderId,
+  });
+};
+
+export const deleteFolder = async (folderId) => {
+  return await ax.delete(`/registred-user/folder/delete/${folderId}`);
+};
+
+export const getMyProjects = async (ids) => {
+  try {
+    const response = await ax.post("/registred-user/projects/by-ids", ids);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching projects:", error);
+    throw error;
   }
 };

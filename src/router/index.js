@@ -23,7 +23,7 @@ import userDashboard from "../myviews/userDashboard/Main.vue";
 import myGroups from "../myviews/myGroups/Main.vue";
 import ErrorPage from "../myviews/error-page/Main.vue";
 import ProjectUserManagement from "../myviews/projectUserManagement/Main.vue";
-
+import propositionManagement from "../myviews/propositionManagment/Main.vue";
 /*services*/
 import Roles from "../utils/roles";
 import RolesPerGroup from "../utils/groupRoles";
@@ -168,8 +168,8 @@ const routes = [
       {
         path: "/Admin/proposition-management",
         name: "propositionManagement",
-        component: () => import("../myviews/propositionManagment/Main.vue"),
-        authorize: [Roles.ADMIN],
+        component: propositionManagement,
+        meta: { authorize: [Roles.ADMIN] },
       },
     ],
   },

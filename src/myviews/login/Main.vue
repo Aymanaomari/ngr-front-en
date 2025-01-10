@@ -55,11 +55,12 @@
               />
               <input
                 type="password"
-                class="intro-x login__input form-control py-3 px-4 block mt-4"
+                class="intro-x login__input form-control py-3 px-4 block mt-4 mb-2"
                 placeholder="Password"
                 v-model="loginInformation.password"
               />
             </div>
+            <div class="text-danger mt-2" v-if="theresError">{{ error }}</div>
             <div
               class="intro-x flex text-slate-600 dark:text-slate-500 text-xs sm:text-sm mt-4"
             >
@@ -124,6 +125,7 @@ export default {
         password: "",
       },
       error: "",
+      theresError: false,
     };
   },
   components: {
@@ -134,7 +136,12 @@ export default {
   },
   methods: {
     login() {
-      log(this.loginInformation.email, this.loginInformation.password);
+      log(this.loginInformation.email, this.loginInformation.password).then(
+        (response) => {
+          this.theresError = true;
+          this.error = response.message;
+        }
+      );
     },
     goToRegister() {
       this.$router.push({ name: "register" });

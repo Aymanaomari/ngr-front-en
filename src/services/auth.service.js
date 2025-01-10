@@ -26,7 +26,7 @@ export const login = async (email, password) => {
       user.roles = response.data.role;
       user.first_name = response.data.user.firstName;
       user.last_name = response.data.user.lastName;
-      user.username = user.first_name + " " + user.last_name;
+      user.username = `${user.first_name} ${user.last_name}`;
       user.id = response.data.user.id;
       user.rolesPerProjects = response.data.groups;
       getUserStore().setMe(user);
@@ -42,31 +42,22 @@ export const login = async (email, password) => {
       }
     } else {
       console.error("Unexpected response status:", response.status);
+      if (response.status == 401)
+        throw new Error("Email or password incorrect");
     }
   } catch (error) {
     console.error("Login error:", error.message || error);
+    return {
+      success: false,
+      message: "Login failed, Email or password incorrect",
+      error,
+    };
   }
 };
 
 export const isLogin = () => {
   return sessionStorage.getItem("token") !== null;
 };
-
-// export const me = async () => {
-//   return await ax.get(`/me`);
-// };
-
-// export const onMountedData = async () => {
-//   return await ax.get(`/onMountedData`);
-// };
-
-// export const resetPassword = async (email) => {
-//   return await ax.get(`/auth/forgot_password/${email}`);
-// };
-
-// export const verifyEmail = async (token) => {
-//   return await ax.get(`/auth/verify_email/${token}`);
-// };
 
 export const register = async (
   first_name,
@@ -76,57 +67,60 @@ export const register = async (
   password,
   password_confirmation
 ) => {
-  if (password != password_confirmation) {
+  // Vérification si les mots de passe sont identiques
+  if (password !== password_confirmation) {
     return {
-      error_message: "passwords not matched",
+      error_message: "Passwords do not match",
     };
   }
-  return await ax.post(`/auth/register`, {
-    user: {
-      firstName: first_name,
-      lastName: last_name,
-      phone: phone,
-      dob: "2003-03-21",
-    },
-    account: {
-      email: email,
-      password: password,
-    },
-  });
+  // Vérification si le prénom et le nom sont non nuls
+  if (!first_name || !last_name) {
+    return {
+      error_message: "First name and last name are required",
+    };
+  }
+  // Vérification de la validité de l'email
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+  if (!emailRegex.test(email)) {
+    return {
+      error_message: "Invalid email format",
+    };
+  }
+  // Vérification de la complexité du mot de passe (minimum 8 caractères, incluant chiffres, lettres et caractères spéciaux)
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+  if (!passwordRegex.test(password)) {
+    return {
+      error_message:
+        "Password must be at least 8 characters, include letters, numbers",
+    };
+  }
+  // Envoi des données à l'API si toutes les validations sont passées
+  try {
+    const response = await ax.post(`/auth/register`, {
+      user: {
+        firstName: first_name,
+        lastName: last_name,
+        phone: phone,
+        dob: "2003-03-21", // La date de naissance peut être dynamique si nécessaire
+      },
+      account: {
+        email: email,
+        password: password,
+      },
+    });
+    // Retour de la réponse de l'API si l'inscription est réussie
+    return response;
+  } catch (error) {
+    console.error("Registration error:", error.message || error);
+    return {
+      error_message:
+        error.message || "Registration failed due to an unknown error",
+    };
+  }
 };
 
-// export const updateProfile = async (first_name, last_name, phone) => {
-//   return await ax.post(`/users/updateProfile`, {
-//     first_name,
-//     last_name,
-//     phone,
-//   });
-// };
-
-// export const changePassword = async (
-//   old_password,
-//   new_password,
-//   new_password_confirmation
-// ) => {
-//   return await ax.post(`/users/changePassword`, {
-//     old_password,
-//     new_password,
-//     new_password_confirmation,
-//   });
-// };
-
 export const logout = async () => {
-  // await getAxios()
-  //   .get(`/auth/logout`)
-  //   .finally(() => {
-  //     localStorage.removeItem("token");
-  //     localStorage.removeItem("exp");
-  //     getUserStore().$reset();
-  //     getAuthStore().$reset();
-  //     router.replace("/login");
-  //   });
   getUserStore().clearUser();
-  // getAuthStore().clearToken();
   sessionStorage.removeItem("token");
   router.replace("/login");
 };

@@ -53,7 +53,7 @@
                 type="text"
                 class="intro-x login__input form-control py-3 px-4 block"
                 placeholder="First Name"
-                v-model="firsName"
+                v-model="firstName"
               />
               <input
                 type="text"
@@ -80,6 +80,9 @@
                 v-model="passwordConfirmation"
               />
             </div>
+            <div v-if="errorMessage" class="text-red-500 text-xs mt-2">
+              {{ errorMessage }}
+            </div>
             <div
               class="intro-x flex items-center text-slate-600 dark:text-slate-500 mt-4 text-xs sm:text-sm"
             >
@@ -89,7 +92,7 @@
                 class="form-check-input border mr-2"
               />
               <label class="cursor-pointer select-none" for="remember-me"
-                >I agree to the Envato</label
+                >I agree to the NGR</label
               >
               <a class="text-primary dark:text-slate-200 ml-1" href=""
                 >Privacy Policy</a
@@ -97,10 +100,12 @@
             </div>
             <div class="intro-x mt-5 xl:mt-8 text-center xl:text-left">
               <button
+                :disabled="isSubmitting"
                 class="btn btn-primary py-3 px-4 w-full xl:w-32 xl:mr-3 align-top"
                 @click="registering()"
               >
-                Register
+                <span v-if="isSubmitting">Loading...</span>
+                <span v-else>Register</span>
               </button>
               <button
                 class="btn btn-outline-secondary py-3 px-4 w-full xl:w-32 mt-3 xl:mt-0 align-top"
@@ -128,11 +133,13 @@ export default {
   },
   data() {
     return {
-      firsName: "",
+      firstName: "", // Correction du champ 'firstName'
       lastName: "",
       email: "",
       password: "",
       passwordConfirmation: "",
+      isSubmitting: false, // Pour indiquer que le formulaire est en cours de soumission
+      errorMessage: "", // Message d'erreur à afficher
     };
   },
   mounted() {
@@ -140,17 +147,51 @@ export default {
   },
   methods: {
     async registering() {
-      let message = await register(
-        this.firsName,
+      // Reset error message on each submission attempt
+      this.errorMessage = "";
+
+      // Basic validation before submitting
+      if (!this.firstName || !this.lastName) {
+        this.errorMessage = "First and Last Name cannot be empty";
+        return;
+      }
+      if (!this.email || !this.email.match(/\S+@\S+\.\S+/)) {
+        this.errorMessage = "Please enter a valid email";
+        return;
+      }
+      if (this.password.length < 8) {
+        this.errorMessage = "Password must be at least 8 characters long";
+        return;
+      }
+      if (this.password !== this.passwordConfirmation) {
+        this.errorMessage = "Passwords do not match";
+        return;
+      }
+
+      this.isSubmitting = true;
+      const message = await register(
+        this.firstName,
         this.lastName,
         this.email,
-        "0630706325",
+        "0630706325", // Utiliser le téléphone réel ou demander à l'utilisateur
         this.password,
         this.passwordConfirmation
       );
-      if (message.status == 201) {
-        login(this.email, this.password);
+
+      if (message.error_message) {
+        this.errorMessage = message.error_message; // Afficher l'erreur reçue de l'API
+        this.isSubmitting = false;
+        return;
       }
+
+      // Si l'enregistrement est réussi, se connecter immédiatement
+      if (message.status === 201) {
+        login(this.email, this.password);
+      } else {
+        this.errorMessage = "Something went wrong. Please try again.";
+      }
+
+      this.isSubmitting = false;
     },
     goToSignIn() {
       this.$router.push({ path: "/signin" });
@@ -158,3 +199,10 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+/* Ajoutez des styles spécifiques pour les éléments, comme le formulaire et les messages d'erreur */
+button:disabled {
+  background-color: gray;
+}
+</style>

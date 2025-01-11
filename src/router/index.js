@@ -232,6 +232,9 @@ router.beforeEach(async (to, from, next) => {
       user.username = user.first_name + " " + user.last_name;
       user.id = response.data.user.id;
       user.rolesPerProjects = response.data.groups;
+      user.dateOfBirthday = response.data.user.dob;
+      user.phoneNumber = response.data.user.phone;
+      user.profession = response.data.user.proffession;
       userStore.setMe(user);
       console.log("User data fetched successfully:", response.data);
     } catch (error) {

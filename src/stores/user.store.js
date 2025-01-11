@@ -44,6 +44,9 @@ export const useUserStore = defineStore({
       me.username = user.username;
       me.roles = user.roles;
       me.rolesPerProjects = user.rolesPerProjects;
+      me.phoneNumber = user.phoneNumber;
+      me.dateOfBirthday = user.dateOfBirthday;
+      me.profession = user.profession;
 
       this.user = me;
 

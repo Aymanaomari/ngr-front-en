@@ -30,6 +30,9 @@
     <div class="col-span-12 lg:col-span-9 2xl:col-span-10">
       <!-- BEGIN: File Manager Filter -->
       <div class="intro-y flex flex-col-reverse sm:flex-row items-center">
+        <div>
+          <button @click="goBack()" class="btn btn-primary">Go Back</button>
+        </div>
         <div class="w-full sm:w-auto relative mr-auto mt-3 sm:mt-0">
           <SearchIcon
             class="w-4 h-4 absolute my-auto inset-y-0 ml-3 left-0 z-10 text-slate-500"
@@ -65,11 +68,13 @@
           >
             <div class="absolute left-0 top-0 mt-3 ml-3"></div>
             <a
+              @click="pushToPath(folder.name, folder.id)"
               v-if="isEmptyFolder(folder)"
-              href=""
+              @click.prevent=""
               class="w-3/5 file__icon file__icon--empty-directory mx-auto"
             ></a>
             <a
+              @click="pushToPath(folder.name, folder.id)"
               v-else-if="!isEmptyFolder(folder)"
               @click.prevent=""
               class="w-3/5 file__icon file__icon--directory mx-auto"
@@ -278,44 +283,128 @@ export default {
       error: null,
       deleteModalPreview: false,
       folderOnDelete: null,
+      currentPath: [], // This will track the current path as an array
+      currentFolder: null,
+      currentParentFolder: null, // This will track the current folder object
     };
   },
   computed: {
     Folders() {
-      if (this.choice == "src") {
-        return this.srcDepot.folders;
-      }
-      if (this.choice == "web") {
-        return this.webDepot.folders;
-      }
+      let depot = this.choice === "src" ? this.srcDepot : this.webDepot;
+      return this.currentFolder ? this.currentFolder.folders : depot.folders;
     },
   },
+
   methods: {
+    // This method will push a folder to the path and update the currentFolder
+    pushToPath(folderName, id) {
+      // Find the folder that matches the name and set it as currentFolder
+      const folder = this.getFolderFromPath(
+        this.currentFolder.folders,
+        folderName
+      );
+      if (folder) {
+        this.currentFolder = folder; // Update currentFolder to the selected folder
+        this.currentPath.push(folderName); // Update currentPath as well
+        this.currentParentFolder = id;
+        console.log("Current Folder:", this.currentFolder);
+      } else {
+        console.error("Folder not found!");
+      }
+    },
+    goBack() {
+      if (this.currentPath.length > 0) {
+        // Remove the last folder from the currentPath
+        this.currentPath.pop();
+        console.log("Updated Path:", this.currentPath);
+
+        // Update the currentFolder based on the new path
+        let newFolder = this.updateCurrentFolder(
+          this.choice === "src" ? this.srcDepot.folders : this.webDepot.folders,
+          this.currentPath
+        );
+
+        // If a new folder is found, update the currentFolder
+        if (newFolder) {
+          this.currentFolder = newFolder;
+        } else {
+          // If no folder is found, reset to the root folder (srcDepot or webDepot)
+          this.currentFolder =
+            this.choice === "src" ? this.srcDepot : this.webDepot;
+        }
+      } else {
+        // If there's no path, reset to the root folder (srcDepot or webDepot)
+        this.currentFolder =
+          this.choice === "src" ? this.srcDepot : this.webDepot;
+      }
+    },
+
+    // Helper method to get the folder from path array
+    getFolderFromPath(folders, folderName) {
+      return folders.find((folder) => folder.name === folderName); // Find the folder by name
+    },
+
+    // This method will update the currentFolder based on the given path array
+    updateCurrentFolder(folders, pathArray) {
+      let currentFolder = null;
+
+      // Iterate through the folders to find the matching path
+      for (let folder of folders) {
+        if (folder.name === pathArray[0]) {
+          // If this folder matches the first part of the path,
+          // check if there's more in the path to go deeper
+          if (pathArray.length > 1) {
+            currentFolder = this.updateCurrentFolder(
+              folder.folders, // Recursively search through subfolders
+              pathArray.slice(1)
+            );
+          } else {
+            currentFolder = folder; // Found the matching folder
+          }
+          break;
+        }
+      }
+
+      return currentFolder;
+    },
+
     fetch() {
       getProject(this.$route.params.name, true).then((data) => {
         this.srcDepot = data.ressrouceProject.srcDepot;
         this.webDepot = data.ressrouceProject.webDepot;
+
+        // Set the root folder as currentFolder when project is fetched
+        this.currentFolder =
+          this.choice === "src" ? this.srcDepot : this.webDepot;
       });
     },
+
     changeChoice(Value) {
       this.choice = Value;
+      this.currentPath = []; // Reset path
+      this.currentFolder =
+        this.choice === "src" ? this.srcDepot : this.webDepot; // Set the new root folder
     },
+
     createFolder() {
       const DepotId =
-        this.choice == "src" ? this.srcDepot.id : this.webDepot.id;
-      createFolderService(DepotId, this.newFolderName, null).then(
-        (response) => {
-          if (response.status == 201) {
-            console.log("hello");
-            this.fetch();
-            this.showCreateModal = false;
-          } else {
-            this.error = "cannot create the folder";
-            console.error("the folder has not been created");
-          }
+        this.choice === "src" ? this.srcDepot.id : this.webDepot.id;
+      createFolderService(
+        DepotId,
+        this.newFolderName,
+        this.currentParentFolder
+      ).then((response) => {
+        if (response.status == 201) {
+          console.log("Folder created");
+          this.fetch();
+          this.showCreateModal = false;
+        } else {
+          this.error = "Cannot create the folder";
+          console.error("The folder has not been created");
         }
-      );
+      });
     },
+
     deleteFolder() {
       deleteFolderService(this.folderOnDelete).then((response) => {
         if (response.status == 202) {
@@ -325,18 +414,22 @@ export default {
         }
       });
     },
+
     isEmptyFolder(folder) {
-      if (folder.subFolders.length == 0 && folder.files.length == 0) {
-        return true;
-      } else {
-        return false;
-      }
+      // Ensure that subFolders and files are always defined as arrays
+      const folders = folder.folders || [];
+      const files = folder.files || [];
+
+      // Check if both subFolders and files are empty
+      return folders.length === 0 && files.length === 0;
     },
+
     deleteFolderModal(id) {
       this.folderOnDelete = id;
       this.deleteModalPreview = true;
     },
   },
+
   mounted() {
     this.fetch();
   },

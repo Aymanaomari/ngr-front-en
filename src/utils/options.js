@@ -31,3 +31,19 @@ export const getProjectVisibility = () => {
     },
   ];
 };
+export const getProfession = () => {
+  return [
+    "IT Student",
+    "IT Professor",
+    "Software Developer",
+    "Data Scientist",
+    "System Administrator",
+    "UX/UI Designer",
+    "Project Manager",
+    "Business Analyst",
+    "Marketing Specialist",
+    "Human Resources Manager",
+    "Graphic Designer",
+    "Web Developer",
+  ];
+};

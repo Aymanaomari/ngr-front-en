@@ -13,7 +13,7 @@
             <img
               alt="Midone Tailwind HTML Admin Template"
               class="rounded-full"
-              :src="$f()[0].photos[0]"
+              src="../../assets/myImages/user.png"
             />
           </div>
           <div class="ml-4 mr-auto">

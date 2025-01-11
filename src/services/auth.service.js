@@ -29,6 +29,9 @@ export const login = async (email, password) => {
       user.username = `${user.first_name} ${user.last_name}`;
       user.id = response.data.user.id;
       user.rolesPerProjects = response.data.groups;
+      user.dateOfBirthday = response.data.user.dob;
+      user.profession = response.data.user.proffession;
+      user.phoneNumber = response.data.user.phone;
       getUserStore().setMe(user);
 
       const redirectPath = localStorage.getItem("redirectAfterLogin");
@@ -65,7 +68,8 @@ export const register = async (
   email,
   phone,
   password,
-  password_confirmation
+  password_confirmation,
+  proffession
 ) => {
   // Vérification si les mots de passe sont identiques
   if (password !== password_confirmation) {
@@ -101,7 +105,8 @@ export const register = async (
         firstName: first_name,
         lastName: last_name,
         phone: phone,
-        dob: "2003-03-21", // La date de naissance peut être dynamique si nécessaire
+        dob: "2003-03-21",
+        proffession, // La date de naissance peut être dynamique si nécessaire
       },
       account: {
         email: email,

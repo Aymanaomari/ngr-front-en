@@ -8,6 +8,9 @@ export default class User {
   roles = null;
   rolesPerProjects = [];
   mygroups = [];
+  dateOfBirthday = null;
+  phoneNumber = null;
+  profession = null;
 
   constructor() {}
 

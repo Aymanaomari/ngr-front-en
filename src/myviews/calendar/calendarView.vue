@@ -1,9 +1,10 @@
+<!-- src/views/calendarView.vue -->
 <template>
   <div class="calendar-container">
     <div class="calendar__header-container">
       <p class="text-lg font-medium mr-5">Calendar</p>
       <p class="text-base font-normal mt-2 text-gray-600">
-        Stay organized and your track with your personlized Calendar
+        Stay organized and track your personalized Calendar
       </p>
     </div>
     <div class="calendar__content-container">
@@ -19,16 +20,16 @@
         </button>
       </div>
       <div class="calendar is-light-mode dark:is-dark-mode">
-        <calendar :eventData="events" heightValue="80vh" ref="calendar" />
+        <calendar  heightValue="80vh" ref="calendar" /> 
+         <!--<CalendarComponent />-->
       </div>
     </div>
 
-    <!-- BEGIN: Modal Content -->
+    <!-- Modal pour ajouter une nouvelle tâche -->
     <Modal
       size="modal-lg"
       :show="ShowNewModal"
       @hidden="ShowNewModal = false"
-      class
     >
       <ModalHeader>
         <h2 class="font-medium text-base mr-auto">Add Task</h2>
@@ -120,60 +121,54 @@
         >
           Cancel
         </button>
-        <button type="button" class="btn btn-primary w-20" @click="saveTask()">
-          save
+        <button type="button" class="btn btn-primary w-20" @click="saveTask">
+          Save
         </button>
       </ModalFooter>
     </Modal>
-    <!-- END: Modal Content -->
   </div>
 </template>
 
-<script>
-import { getPersonalCalendarStore } from "../../stores";
-import { transformDate } from "../../utils/date";
-export default {
-  data() {
-    return {
-      ShowNewModal: false,
-      newTask: {
-        title: null,
-        with: null,
-        time: { start: null, end: null },
-        color: null,
-        isEditable: true,
-        id: null,
-        description: null,
-      },
-      startDate: "",
-      startTime: "",
-      endDate: "",
-      endTime: "",
-    };
-  },
-  methods: {
-    saveTask() {
-      let title = this.newTask.title;
-      let time = {
-        start: transformDate(this.startDate) + " " + this.startTime,
-        end: transformDate(this.endDate) + " " + this.endTime,
-      };
-      let color = this.newTask.color;
-      let isEditable = true;
-      let id = "";
-      let description = this.newTask.description;
-      let task = {
-        title,
-        with: null,
-        time,
-        color,
-        isEditable,
-        id,
-        description,
-      };
-      getPersonalCalendarStore().addEvent(task);
+<script setup>
+import { ref } from 'vue';
+import { usePersonalCalendarStore } from '@/stores/personalCalenderStore.store.js';
+import { transformDate } from '@/utils/date';
+
+
+const store = usePersonalCalendarStore();
+
+const ShowNewModal = ref(false);
+const newTask = ref({
+  title: null,
+  with: null,
+  time: { start: null, end: null },
+  color: null,
+  isEditable: true,
+  id: null,
+  description: null,
+});
+const startDate = ref('');
+const startTime = ref('');
+const endDate = ref('');
+const endTime = ref('');
+
+const saveTask = async () => {
+  const task = {
+    title: newTask.value.title,
+    time: {
+      start: transformDate(startDate.value) + ' ' + startTime.value,
+      end: transformDate(endDate.value) + ' ' + endTime.value,
     },
-  },
+    color: newTask.value.color,
+    isEditable: true,
+    id: null,
+    description: newTask.value.description,
+  };
+
+   console.log(task);
+
+  await store.addTask(task); // Ajoute la tâche via le store
+  ShowNewModal.value = false; // Ferme le modal
 };
 </script>
 
@@ -189,7 +184,7 @@ export default {
   @apply flex w-full flex-col mb-4;
 }
 .calendar__content-container {
-  @apply flex gap-3  overflow-hidden flex-col;
+  @apply flex gap-3 overflow-hidden flex-col;
   height: max-content;
 }
 .calendar {

@@ -61,7 +61,7 @@ export const useTopMenuStore = defineStore("topMenu", {
       // Priority logic: Admin role takes precedence over User role
       if (userRoles.includes(Roles.ADMIN)) {
         this.menu = adminMenu;
-      } else if (userRoles.includes(Roles.USER)) {
+      } else if (userRoles.includes(Roles.REGISTRED_USER)) {
         this.menu = userMenu;
       } else {
         this.menu = []; // Default to empty menu if no roles match

@@ -1,6 +1,6 @@
 <template>
   <!-- BEGIN: Chat Content -->
-  <div class="intro-y col-span-12 lg:col-span-8 2xl:col-span-9">
+  <div class="intro-y col-span-12">
     <div class="chat__box box">
       <!-- BEGIN: Chat Active -->
       <div class="h-full flex flex-col">
@@ -16,7 +16,9 @@
               />
             </div> -->
             <div class="ml-3 mr-auto">
-              <div class="font-medium text-base">Global Chat</div>
+              <div class="font-medium text-base">
+                {{ project.longname }} Chat
+              </div>
               <div class="text-slate-500 text-xs sm:text-sm">
                 <span class="mx-1 text-green-500">•</span> Online
               </div>
@@ -32,8 +34,11 @@
         </div>
 
         <!--start of the chat message-->
-        <div class="overflow-y-scroll scrollbar-hidden px-5 pt-5 flex-1">
-          <template v-for="(message, key) in projectMessages" :key="key">
+        <div
+          class="overflow-y-scroll scrollbar-hidden px-5 pt-5 flex-1"
+          ref="chatContent"
+        >
+          <template v-for="(message, key) in messages" :key="key">
             <!--if the send is the same person-->
             <div
               class="chat__box__text-box flex items-end float-right mb-4"
@@ -64,7 +69,7 @@
               >
                 {{ message.content }}
                 <div class="mt-1 text-xs text-white text-opacity-80">
-                  {{ calculateTimeDifferenceM(message.date) }} ago
+                  {{ calculateTimeDifferenceM(message.timestamp) }}
                 </div>
               </div>
               <div
@@ -73,7 +78,7 @@
                 <img
                   alt="Midone Tailwind HTML Admin Template"
                   class="rounded-full"
-                  :src="$f()[1].photos[0]"
+                  src="../../../assets/myImages/user.png"
                 />
               </div>
             </div>
@@ -88,19 +93,19 @@
                 <img
                   alt="Midone Tailwind HTML Admin Template"
                   class="rounded-full"
-                  src="../../../assets/myImages/images.jpeg"
+                  src="../../../assets/myImages/user.png"
                 />
               </div>
               <div
                 class="bg-slate-100 dark:bg-darkmode-400 px-4 py-3 text-slate-500 rounded-r-md rounded-t-md"
               >
                 {{ message.content }}
-                <div class="mt-1 text-xs text-slate-500 flex justify-between">
-                  <span class="font-semibold">{{
-                    message.sender.first_name + " " + message.sender.last_name
+                <div class="mt-1 text-xs text-slate-500 flex gap-1">
+                  <span class="font-bold">{{
+                    message.senderFirstName + " " + message.senderLastName
                   }}</span>
                   <span>
-                    {{ calculateTimeDifferenceM(message.date) }} ago
+                    {{ calculateTimeDifferenceM(message.timestamp) }} ago
                   </span>
                 </div>
               </div>
@@ -125,6 +130,7 @@
                 </DropdownMenu>
               </Dropdown>
             </div>
+
             <div class="clear-both"></div>
           </template>
         </div>
@@ -136,6 +142,7 @@
             class="chat__box__input form-control dark:bg-darkmode-600 h-16 resize-none border-transparent px-5 py-3 shadow-none focus:border-transparent focus:ring-0"
             rows="1"
             placeholder="Type your message..."
+            v-model="messageContent"
           ></textarea>
           <div
             class="flex absolute sm:static left-0 bottom-0 ml-5 sm:ml-0 mb-5 sm:mb-0"
@@ -150,12 +157,12 @@
               />
             </div>
           </div>
-          <a
-            href="javascript:;"
-            class="w-8 h-8 sm:w-10 sm:h-10 block bg-primary text-white rounded-full flex-none flex items-center justify-center mr-5"
+          <div
+            @click="sendMessage()"
+            class="w-8 h-8 sm:w-10 sm:h-10 block bg-primary text-white rounded-full flex-none flex items-center justify-center mr-5 cursor-pointer"
           >
             <SendIcon class="w-4 h-4" />
-          </a>
+          </div>
         </div>
       </div>
       <!-- END: Chat Active -->
@@ -167,55 +174,131 @@
 </template>
 
 <script>
-import { RouterView } from "vue-router";
-import router from "../../../router";
-import { getUserStore } from "../../../stores";
-import Roles from "../../../utils/roles";
-import { getfakeUsersProjects } from "../../../services/fake/projectMembers.service";
+import { getProjectStore, getUserStore } from "../../../stores";
 import RolesPerGroup from "../../../utils/groupRoles";
-import { calculateTimeDifference } from "../../../utils/date";
-// import WebSocketClient from "../../../services/chat/chat.service";
-
+import { calculateTimeDifferenceStamp } from "../../../utils/date";
+import { getProject } from "../../../services/project/project.service";
+import { getGroupMessages } from "../../../services/project/projectChat.service";
 export default {
   data() {
     return {
       chatBox: false,
       projectData: {}, // Reactive state
-      user: null,
+      user: getUserStore().user.id,
       projectMessages: [],
+      project: {
+        longname: null,
+      },
+      connection: null,
+      messageContent: "",
     };
+  },
+  computed: {
+    messages() {
+      return getProjectStore().project.generalChatGroup.messages;
+    },
   },
   methods: {
     showChatBox() {
-      this.chatBox = !this.chatBox; // Toggle chatBox state
+      this.chatBox = !this.chatBox; // Toggle chatBox visibility
     },
     myMessage(message) {
-      if (message.sender.id == this.user) {
-        return true;
-      }
-      return false;
+      console.log();
+      return message.senderId === this.user;
     },
     calculateTimeDifferenceM(time) {
-      return calculateTimeDifference(time);
+      return calculateTimeDifferenceStamp(time);
     },
-  },
+    async initializeSocket() {
+      try {
+        // Fetch project and chat group details
+        const projectData = await getProject(this.$route.params.name, true);
+        if (!projectData) throw new Error("Project data is undefined.");
 
-  computed: {
-    isAdmin() {
-      return getUserStore().user.hasRoleInGroup(
-        this.$route.params.name,
-        RolesPerGroup.GROUPADMIN
-      );
+        // Fetch group messages
+        getGroupMessages(projectData.generalChatGroup.id).then((response) => {
+          getProjectStore().project.generalChatGroup.messages = response.data;
+        });
+
+        // Extract project and group ID
+        this.projectId = projectData.id;
+        this.groupId = projectData.generalChatGroup.id;
+        console.log("Project ID:", this.projectId);
+        console.log("Group ID:", this.groupId);
+
+        // Get authentication token from sessionStorage
+        const token = sessionStorage.getItem("token");
+        if (!token) throw new Error("Authentication token is missing.");
+
+        // Add token to the WebSocket URL as a query parameter
+        const socketUrl = `http://localhost:6541/ws/chat?token=${token}`;
+
+        // Set up SockJS and STOMP client
+        const socket = new SockJS(socketUrl);
+
+        this.stompClient = Stomp.over(socket);
+
+        // Connect with authorization headers if needed
+        this.stompClient.connect(
+          {},
+          (frame) => {
+            console.log("Connected: " + frame);
+
+            // Subscribe to the chat topic
+            this.stompClient.subscribe(
+              `/topic/chat/${this.projectId}/${this.groupId}`,
+              (messageOutput) => {
+                console.lo;
+                // Handle received message
+                getProjectStore().project.generalChatGroup.addmessage({
+                  messageOutput,
+                });
+
+                // Scroll to the latest message
+                this.$nextTick(() => {
+                  const chatContent = this.$refs.chatContent;
+                  if (chatContent) {
+                    chatContent.scrollTop = chatContent.scrollHeight;
+                  }
+                });
+              }
+            );
+          },
+          (error) => {
+            console.error("STOMP connection error:", error);
+          }
+        );
+      } catch (error) {
+        console.error("Error initializing WebSocket:", error);
+      }
+    },
+
+    sendMessage() {
+      if (this.messageContent.trim() === "") {
+        return;
+      }
+
+      const message = {
+        senderId: this.user,
+        content: this.messageContent,
+        type: "TEXT", // Adjust message type as necessary
+      };
+
+      if (this.stompClient && this.stompClient.connected) {
+        this.stompClient.send(
+          `/app/chat/${this.projectId}/${this.groupId}`,
+          {},
+          JSON.stringify(message)
+        );
+
+        this.messageContent = ""; // Clear input after sending
+      } else {
+        console.error("STOMP client is not connected.");
+      }
     },
   },
-  mounted() {
-    this.projectData = getfakeUsersProjects();
-    this.user = getUserStore().user.id;
-    this.projectMessages = this.projectData.globalMessages;
-    // let websocket = new WebSocketClient();
-    // websocket.connect(() => {
-    //   console.log("connected to websocket");
-    // });
+  async mounted() {
+    await this.initializeSocket();
   },
 };
 </script>

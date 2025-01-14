@@ -20,6 +20,25 @@ ax.interceptors.request.use((config) => {
   return config;
 });
 
+export const getUploadAxios = () => {
+  return axios.create({
+    baseURL: $h.env("VITE_API_URL"),
+    headers: {
+      Accept: "multipart/form-data",
+      "Content-Type": "multipart/form-data",
+      ...(sessionStorage.getItem("token") && {
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+      }),
+      "Access-Control-Allow-Origin": "true",
+    },
+    onUploadProgress: (progressEvent) => {
+      sendingPercent.value = parseInt(
+        Math.round((progressEvent.loaded / progressEvent.total) * 100)
+      );
+    },
+  });
+};
+
 // export const ax2 = axios.create({
 //   baseURL: $h.env("VITE_API_URL"),
 //   headers: {

@@ -2,27 +2,16 @@ import { icons } from "lucide";
 
 export const getCategories = () => {
   return [
-    "E-Commerce",
     "Education and Learning",
-    "Creative Portfolios and Showcases",
-    "Health and Fitness",
     "Finance and Business",
     "Entertainment and Media",
     "Social and Networking",
-    "Real Estate and Property",
-    "Travel and Hospitality",
     "Technology and Development",
-    "Charity and Non-Profit",
     "Fashion and Lifestyle",
     "Food and Beverage",
     "Automotive and Transportation",
-    "Home and Garden",
     "Science and Research",
-    "Sports and Recreation",
     "Jobs and Careers",
-    "Government and Civic Engagement",
-    "Personal and Productivity Tools",
-    "Other Niche Categories",
   ];
 };
 
@@ -40,5 +29,21 @@ export const getProjectVisibility = () => {
       name: "PRIVATE",
       icon: "LockIcon",
     },
+  ];
+};
+export const getProfession = () => {
+  return [
+    "IT Student",
+    "IT Professor",
+    "Software Developer",
+    "Data Scientist",
+    "System Administrator",
+    "UX/UI Designer",
+    "Project Manager",
+    "Business Analyst",
+    "Marketing Specialist",
+    "Human Resources Manager",
+    "Graphic Designer",
+    "Web Developer",
   ];
 };

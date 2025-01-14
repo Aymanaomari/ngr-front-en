@@ -5,13 +5,15 @@ import path from "path";
 // https://vitejs.dev/config/
 export default defineConfig({
   define: {
-    global: "globalThis",
+    global: {},
+    "process.env": process.env,
   },
 
   plugins: [vue()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      web3: "web3/dist/web3.min.js",
     },
   },
 });

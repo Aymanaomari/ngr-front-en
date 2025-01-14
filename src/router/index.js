@@ -16,14 +16,13 @@ import calendarView from "../myviews/calendar/calendarView.vue";
 import projectMenu from "../layouts/projectMenu/Main.vue";
 import profjectFileManager from "../myviews/project-file-manager/Main.vue";
 import projectChat from "../myviews/projectChat/Main.vue";
-import personalChatContent from "../myviews/projectChat/personalChatContent/Main.vue";
 import globalChatContent from "../myviews/projectChat/globalChatContent/Main.vue";
-import subGroupChatContent from "../myviews/projectChat/subGroupChatContent/Main.vue";
 import userDashboard from "../myviews/userDashboard/Main.vue";
 import myGroups from "../myviews/myGroups/Main.vue";
 import ErrorPage from "../myviews/error-page/Main.vue";
 import ProjectUserManagement from "../myviews/projectUserManagement/Main.vue";
-
+import propositionManagement from "../myviews/propositionManagment/Main.vue";
+import ForgotPassword from "../myviews/forgotPassword/Main.vue";
 /*services*/
 import Roles from "../utils/roles";
 import RolesPerGroup from "../utils/groupRoles";
@@ -138,25 +137,11 @@ const routes = [
                 name: "ProjectChat",
                 component: globalChatContent,
               },
-              {
-                path: "subgroup/:id",
-                name: "subgroupChat",
-                component: subGroupChatContent,
-              },
-              {
-                path: "personal/:userId",
-                name: "personalChat",
-                component: personalChatContent,
-                props: (route) => ({
-                  groupName: route.params.name,
-                  userId: route.params.userId,
-                }),
-              },
             ],
           },
           {
-            path: "/UsersManagement",
-            name: "UsersManagement",
+            path: "UsersManagement",
+            name: "ProjectUsersManagement",
             component: ProjectUserManagement,
             meta: {
               meta: { authorize: [Roles.REGISTRED_USER, Roles.ADMIN] },
@@ -168,8 +153,8 @@ const routes = [
       {
         path: "/Admin/proposition-management",
         name: "propositionManagement",
-        component: () => import("../myviews/propositionManagment/Main.vue"),
-        authorize: [Roles.ADMIN],
+        component: propositionManagement,
+        meta: { authorize: [Roles.ADMIN] },
       },
     ],
   },
@@ -188,7 +173,11 @@ const routes = [
     name: "error-page",
     component: ErrorPage,
   },
-  {},
+  {
+    path: "/Forgotpassword",
+    name: "forgotPassword",
+    component: ForgotPassword,
+  },
   {
     path: "/:pathMatch(.*)*",
     component: ErrorPage,
@@ -204,7 +193,7 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-  const publicPages = ["/login", "/register"];
+  const publicPages = ["/login", "/register", "/Forgotpassword"];
   const authRequired = !publicPages.includes(to.path);
   const defaultPages = ["/"];
   const { authorize, groupAuthorize } = to.meta;
@@ -232,6 +221,9 @@ router.beforeEach(async (to, from, next) => {
       user.username = user.first_name + " " + user.last_name;
       user.id = response.data.user.id;
       user.rolesPerProjects = response.data.groups;
+      user.dateOfBirthday = response.data.user.dob;
+      user.phoneNumber = response.data.user.phone;
+      user.profession = response.data.user.proffession;
       userStore.setMe(user);
       console.log("User data fetched successfully:", response.data);
     } catch (error) {

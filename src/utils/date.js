@@ -45,16 +45,49 @@ export const calculateTimeDifference = (sentTime) => {
   return `${days} day${days !== 1 ? "s" : ""}`;
 };
 
-export const formatDate = (createdAt) => {
-  if (!Array.isArray(createdAt) || createdAt.length < 6) {
-    throw new Error("Invalid date format");
+export const formatDate = (timestamp) => {
+  if (typeof timestamp !== "number") {
+    throw new Error("Invalid date format: timestamp should be a number.");
   }
 
-  const [year, month, day, hour, minute, second] = createdAt;
+  // Convert the timestamp from seconds to milliseconds (JavaScript works with milliseconds)
+  const milliseconds = Math.floor(timestamp * 1000);
 
-  // JavaScript's Date object uses 0-based indexing for months
-  const date = new Date(year, month - 1, day, hour, minute, second);
+  // Create a new Date object
+  const date = new Date(milliseconds);
 
   // Format the date as a readable string
-  return date.toLocaleString(); // You can customize options for formatting
+  return date.toLocaleString(); // Customize options as needed
+};
+
+export const calculateTimeDifferenceStamp = (unixTimestamp) => {
+  // Convert the UNIX timestamp (in seconds) to milliseconds
+  const targetTime = new Date(unixTimestamp * 1000);
+  const currentTime = new Date();
+
+  // Calculate the difference in milliseconds
+  const differenceInMilliseconds = targetTime - currentTime;
+
+  // Check if the target time is in the past or future
+  const isPast = differenceInMilliseconds < 0;
+
+  // Get the absolute value of the difference for calculations
+  const absoluteDifference = Math.abs(differenceInMilliseconds);
+
+  // Convert milliseconds to time components
+  const seconds = Math.floor(absoluteDifference / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  // Return the appropriate format
+  if (days > 0) {
+    return `${days} days ${isPast ? "ago" : "from now"}`;
+  } else if (hours > 0) {
+    return `${hours} hours ${isPast ? "ago" : "from now"}`;
+  } else if (minutes > 0) {
+    return `${minutes} minutes ${isPast ? "ago" : "from now"}`;
+  } else {
+    return `${seconds} seconds ${isPast ? "ago" : "from now"}`;
+  }
 };

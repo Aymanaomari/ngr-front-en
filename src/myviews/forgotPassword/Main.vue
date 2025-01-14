@@ -40,7 +40,7 @@
             <h2
               class="intro-x font-bold text-2xl xl:text-3xl text-center xl:text-left"
             >
-              Sign In
+              Reset your Password
             </h2>
             <div class="intro-x mt-2 text-slate-400 xl:hidden text-center">
               A few more clicks to sign in to your account. Manage all your
@@ -51,45 +51,27 @@
                 type="text"
                 class="intro-x login__input form-control py-3 px-4 block"
                 placeholder="Email"
-                v-model="loginInformation.email"
-              />
-              <input
-                type="password"
-                class="intro-x login__input form-control py-3 px-4 block mt-4 mb-2"
-                placeholder="Password"
-                v-model="loginInformation.password"
+                v-model="email"
               />
             </div>
             <div class="text-danger mt-2" v-if="theresError">{{ error }}</div>
             <div
               class="intro-x flex text-slate-600 dark:text-slate-500 text-xs sm:text-sm mt-4"
+            ></div>
+            <div
+              class="intro-x mt-5 xl:mt-8 text-center xl:text-left flex gap-3"
             >
-              <div class="flex items-center mr-auto">
-                <input
-                  id="remember-me"
-                  type="checkbox"
-                  class="form-check-input border mr-2"
-                />
-                <label class="cursor-pointer select-none" for="remember-me"
-                  >Remember me</label
-                >
-              </div>
-              <p @click="gotoForgotPassword()" class="cursor-pointer">
-                Forgot Password?
-              </p>
-            </div>
-            <div class="intro-x mt-5 xl:mt-8 text-center xl:text-left">
-              <button
-                class="btn btn-primary py-3 px-4 w-full xl:w-32 xl:mr-3 align-top"
-                @click="login()"
-              >
-                Login
-              </button>
               <button
                 class="btn btn-outline-secondary py-3 px-4 w-full xl:w-32 mt-3 xl:mt-0 align-top"
+                @click="gotoLoginPage()"
+              >
+                Cancel
+              </button>
+              <button
+                class="btn btn-primary py-3 px-4 w-full xl:w-32 xl:mr-3 align-top"
                 @click="goToRegister()"
               >
-                Register
+                Reset
               </button>
             </div>
             <div
@@ -118,17 +100,13 @@ import DarkModeSwitcher from "@/components/dark-mode-switcher/Main.vue";
 import dom from "@left4code/tw-starter/dist/js/dom";
 import { email } from "@vuelidate/validators";
 import { isLogin, login as log } from "../../services/auth.service";
-import router from "../../router";
 
 export default {
   data() {
     return {
-      loginInformation: {
-        email: "",
-        password: "",
-      },
       error: "",
       theresError: false,
+      email: "",
     };
   },
   components: {
@@ -138,20 +116,8 @@ export default {
     dom("body").removeClass("main").removeClass("error-page").addClass("login");
   },
   methods: {
-    login() {
-      log(this.loginInformation.email, this.loginInformation.password).then(
-        (response) => {
-          this.theresError = true;
-          this.error = response.message;
-        }
-      );
-    },
-    goToRegister() {
-      this.$router.push({ name: "register" });
-    },
-    gotoForgotPassword() {
-      console.log("hello");
-      this.$router.push({ path: "/Forgotpassword" });
+    gotoLoginPage() {
+      this.$router.push("/login");
     },
   },
 };

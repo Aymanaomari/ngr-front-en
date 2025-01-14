@@ -24,6 +24,11 @@ export const useProjectMenuStore = defineStore("ProjectMenu", {
           pageName: "ProjectChat",
           title: "chat",
         },
+        {
+          icon: "UsersIcon",
+          pageName: "ProjectUsersManagement",
+          title: "Members",
+        },
       ];
       const userMenu = [
         {
@@ -43,9 +48,7 @@ export const useProjectMenuStore = defineStore("ProjectMenu", {
       } else {
         // Build the final menu based on roles
         this.menu = [
-          ...(user.hasRoleInGroup(group, RolesPerGroup.GROUPADMIN)
-            ? adminMenu
-            : []),
+          ...(user.hasRoleInGroup(group, RolesPerGroup.ADMIN) ? adminMenu : []),
           ...(user.hasRoleInGroup(group, RolesPerGroup.MEMBER) ? userMenu : []),
         ];
       }

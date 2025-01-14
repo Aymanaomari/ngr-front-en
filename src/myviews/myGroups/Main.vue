@@ -1,5 +1,5 @@
 <template>
-  <h2 class="intro-y text-lg font-medium mt-10">Product Grid</h2>
+  <h2 class="intro-y text-lg font-medium mt-10">My Projects</h2>
   <div class="grid grid-cols-12 gap-6 mt-5">
     <div
       class="intro-y col-span-12 flex flex-wrap sm:flex-nowrap items-center mt-2"
@@ -11,14 +11,16 @@
         Create New Group
       </button>
       <div class="hidden md:block mx-auto text-slate-500">
-        Showing 1 to 10 of 150 entries
+        {{ entriesText }}
       </div>
+
       <div class="w-full sm:w-auto mt-3 sm:mt-0 sm:ml-auto md:ml-0">
         <div class="w-56 relative text-slate-500">
           <input
             type="text"
             class="form-control w-56 box pr-10"
-            placeholder="Search..."
+            placeholder="Search by short name"
+            v-model="searchQuery"
           />
           <SearchIcon class="w-4 h-4 absolute my-auto inset-y-0 mr-3 right-0" />
         </div>
@@ -26,7 +28,7 @@
     </div>
     <!-- BEGIN: Users Layout -->
     <div
-      v-for="(project, projectKey) in Projects"
+      v-for="(project, projectKey) in paginatedProjects"
       :key="projectKey"
       class="intro-y col-span-12 md:col-span-6 lg:col-span-4 xl:col-span-3"
     >
@@ -36,13 +38,68 @@
             class="h-40 2xl:h-56 image-fit rounded-md overflow-hidden before:block before:absolute before:w-full before:h-full before:top-0 before:left-0 before:z-10 before:bg-gradient-to-t before:from-black before:to-black/10"
           >
             <img
-              alt="Midone - HTML Admin Template"
+              v-if="project.category == 'Education and Learning'"
+              src="../../assets/myImages/categories/Education-and-Learning.png"
+              alt="Education Image"
               class="rounded-md"
-              src="#"
+            />
+            <img
+              v-if="project.category == 'Finance and Business'"
+              src="../../assets/myImages/categories/Finance-and-Business.png"
+              alt="Finance Image"
+              class="rounded-md"
+            />
+            <img
+              v-if="project.category == 'Entertainment and Media'"
+              src="../../assets/myImages/categories/Entertainment-and-Media.png"
+              alt="Entertainment Image"
+              class="rounded-md"
+            />
+            <img
+              v-if="project.category == 'Social and Networking'"
+              src="../../assets/myImages/categories/Social-and-Networking.png"
+              alt="Social Image"
+              class="rounded-md"
+            />
+            <img
+              v-if="project.category == 'Technology and Development'"
+              src="../../assets/myImages/categories/Technology-and-Development.png"
+              alt="Technology Image"
+              class="rounded-md"
+            />
+            <img
+              v-if="project.category == 'Fashion and Lifestyle'"
+              src="../../assets/myImages/categories/Health-and-Fitness.png"
+              alt="Fashion Image"
+              class="rounded-md"
+            />
+            <img
+              v-if="project.category == 'Food and Beverages'"
+              src="../../assets/myImages/categories/Food-and-Beverage.png"
+              alt="Food Image"
+              class="rounded-md"
+            />
+            <img
+              v-if="project.category == 'Automotive and Transportations'"
+              src="../../assets/myImages//categories/Automotive-and-Transportation.png"
+              alt="Automotive Image"
+              class="rounded-md"
+            />
+            <img
+              v-if="project.category == 'Science and Research'"
+              src="../../assets/myImages/categories/Science-and-Research.png"
+              alt="Science Image"
+              class="rounded-md"
+            />
+            <img
+              v-if="project.category == 'Jobs and Careers'"
+              src="../../assets/myImages/categories/Jobs-and-Careers.png"
+              alt="Jobs Image"
+              class="rounded-md"
             />
             <div class="absolute bottom-0 text-white px-5 pb-6 z-10">
               <a href="" class="block font-medium text-base">{{
-                project.longname
+                project.longName
               }}</a>
               <div class="flex gap-1 items-center">
                 <span
@@ -68,55 +125,69 @@
     </div>
     <!-- END: Users Layout -->
     <!-- BEGIN: Pagination -->
+    <!-- BEGIN: Pagination -->
     <div
-      class="intro-y col-span-12 flex flex-wrap sm:flex-row sm:flex-nowrap items-center"
+      class="intro-y col-span-12 flex flex-wrap sm:flex-row sm:flex-nowrap items-center justify-center gap-5"
     >
-      <nav class="w-full sm:w-auto sm:mr-auto">
+      <nav class="w-full sm:w-auto sm:mr-auto justify-self-center">
         <ul class="pagination">
-          <li class="page-item">
-            <a class="page-link" href="#">
+          <li
+            class="page-item text-gray-400"
+            :class="{ disabled: currentPage === 1 }"
+          >
+            <a class="page-link" @click.prevent="currentPage = 1">
               <ChevronsLeftIcon class="w-4 h-4" />
             </a>
           </li>
-          <li class="page-item">
-            <a class="page-link" href="#">
+          <li
+            class="page-item text-gray-40"
+            :class="{ disabled: currentPage === 1 }"
+          >
+            <a class="page-link" @click.prevent="currentPage = currentPage - 1">
               <ChevronLeftIcon class="w-4 h-4" />
             </a>
           </li>
-          <li class="page-item">
-            <a class="page-link" href="#">...</a>
+          <li class="page-item" v-for="page in totalPages" :key="page">
+            <a
+              class="page-link"
+              :class="{ active: currentPage === page }"
+              @click.prevent="currentPage = page"
+            >
+              {{ page }}
+            </a>
           </li>
-          <li class="page-item">
-            <a class="page-link" href="#">1</a>
-          </li>
-          <li class="page-item active">
-            <a class="page-link" href="#">2</a>
-          </li>
-          <li class="page-item">
-            <a class="page-link" href="#">3</a>
-          </li>
-          <li class="page-item">
-            <a class="page-link" href="#">...</a>
-          </li>
-          <li class="page-item">
-            <a class="page-link" href="#">
+          <li
+            class="page-item text-gray-40"
+            :class="{ disabled: currentPage === totalPages }"
+          >
+            <a class="page-link" @click.prevent="currentPage = currentPage + 1">
               <ChevronRightIcon class="w-4 h-4" />
             </a>
           </li>
-          <li class="page-item">
-            <a class="page-link" href="#">
+          <li
+            class="page-item text-gray-40"
+            :class="{ disabled: currentPage === totalPages }"
+          >
+            <a class="page-link" @click.prevent="currentPage = totalPages">
               <ChevronsRightIcon class="w-4 h-4" />
             </a>
           </li>
         </ul>
       </nav>
-      <select class="w-20 form-select box mt-3 sm:mt-0">
+
+      <select
+        class="w-20 form-select box mt-3 sm:mt-0"
+        v-model="itemsPerPage"
+        @change="currentPage = 1"
+      >
         <option>10</option>
         <option>25</option>
         <option>35</option>
         <option>50</option>
       </select>
     </div>
+    <!-- END: Pagination -->
+
     <!-- END: Pagination -->
   </div>
   <!-- BEGIN: Delete Confirmation Modal -->
@@ -170,7 +241,7 @@
                 v-model="formData.category"
               >
                 <template v-for="(cat, index) in categories" :key="index">
-                  <option>{{ cat }}s</option>
+                  <option>{{ cat }}</option>
                 </template>
               </select>
             </div>
@@ -242,8 +313,7 @@ import { ref } from "vue";
 import { getCategories, getProjectVisibility } from "../../utils/options";
 import { getProjectTypes } from "../../utils/options";
 import { createProposition } from "../../services/registred-user/porposition.service";
-import { create } from "lodash";
-import { getMyProjects } from "../../services/registred-user/project.service";
+import { getMyProjects } from "../../services/project/project.service";
 import { getUserStore } from "../../stores";
 
 export default {
@@ -269,9 +339,45 @@ export default {
       editorData: ref("<p>Content of the editor.</p>"),
       ProjectVisibilities: [],
       Projects: [],
+      currentPage: 1,
+      itemsPerPage: 10,
+      searchQuery: "",
     };
   },
+  computed: {
+    // Filter projects based on the search query
+    filteredProjects() {
+      return this.Projects.filter((project) =>
+        project.shortName.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+    },
+
+    // Paginate filtered projects
+    paginatedProjects() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.filteredProjects.slice(start, end);
+    },
+
+    // Calculate the total number of pages
+    totalPages() {
+      return Math.ceil(this.filteredProjects.length / this.itemsPerPage);
+    },
+
+    // Display text for showing range
+    entriesText() {
+      const start = (this.currentPage - 1) * this.itemsPerPage + 1;
+      const end = Math.min(
+        this.currentPage * this.itemsPerPage,
+        this.filteredProjects.length
+      );
+      return `Showing ${start} to ${end} of ${this.filteredProjects.length} entries`;
+    },
+  },
   methods: {
+    goToPage(page) {
+      this.currentPage = page;
+    },
     GoToPropositionForm() {
       this.propositionModal = true;
     },
@@ -312,6 +418,29 @@ export default {
         this.Projects = res;
       });
     },
+    linkTransform(name) {
+      return name.replaceAll(" ", "-");
+    },
+    // async getlink(projectCategory) {
+    //   try {
+    //     // Dynamic import with the transformed category name
+    //     const transformedCategory = this.linkTransform(projectCategory);
+    //     const image = await import(
+    //       `../../assets/images/myImages/categories/${transformedCategory}.png`
+    //     );
+    //     return image.default; // Make sure to return the URL of the imported image
+    //   } catch (error) {
+    //     console.error(
+    //       "Error loading image for category:",
+    //       projectCategory,
+    //       error
+    //     );
+    //     return new URL(
+    //       "../../assets/myImages/categories/default.png",
+    //       import.meta.url
+    //     ).href;
+    //   }
+    // },
   },
   mounted() {
     this.categories = getCategories();

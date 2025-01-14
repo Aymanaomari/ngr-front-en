@@ -44,10 +44,19 @@ export const useUserStore = defineStore({
       me.username = user.username;
       me.roles = user.roles;
       me.rolesPerProjects = user.rolesPerProjects;
+      me.phoneNumber = user.phoneNumber;
+      me.dateOfBirthday = user.dateOfBirthday;
+      me.profession = user.profession;
 
       this.user = me;
 
       // Store the user data in sessionStorage
+    },
+    async clearUser() {
+      // Clear the user data from the store
+      this.user = new User();
+      // Clear the user data from the sessionStorage
+      // Redirect the user to the login page
     },
   },
 });

@@ -8,7 +8,7 @@ import { getProject } from "../services/project/project.service";
 export const userProjectStore = defineStore({
   id: "userProject",
   state: () => ({
-    project: null,
+    project: new Project(),
   }),
   actions: {
     setProject(project) {

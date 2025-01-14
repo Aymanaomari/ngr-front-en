@@ -24,6 +24,11 @@ export const useProjectMenuStore = defineStore("ProjectMenu", {
           pageName: "ProjectChat",
           title: "chat",
         },
+        {
+          icon: "UsersIcon",
+          pageName: "ProjectUsersManagement",
+          title: "Members",
+        },
       ];
       const userMenu = [
         {

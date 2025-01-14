@@ -1,6 +1,6 @@
 <template>
   <!-- BEGIN: Chat Content -->
-  <div class="intro-y col-span-12 lg:col-span-8 2xl:col-span-9">
+  <div class="intro-y col-span-12">
     <div class="chat__box box">
       <!-- BEGIN: Chat Active -->
       <div class="h-full flex flex-col">
@@ -16,7 +16,9 @@
               />
             </div> -->
             <div class="ml-3 mr-auto">
-              <div class="font-medium text-base">Global Chat</div>
+              <div class="font-medium text-base">
+                {{ project.longname }} Chat
+              </div>
               <div class="text-slate-500 text-xs sm:text-sm">
                 <span class="mx-1 text-green-500">•</span> Online
               </div>
@@ -73,7 +75,7 @@
                 <img
                   alt="Midone Tailwind HTML Admin Template"
                   class="rounded-full"
-                  :src="$f()[1].photos[0]"
+                  src="../../../assets/myImages/user.png"
                 />
               </div>
             </div>
@@ -136,6 +138,7 @@
             class="chat__box__input form-control dark:bg-darkmode-600 h-16 resize-none border-transparent px-5 py-3 shadow-none focus:border-transparent focus:ring-0"
             rows="1"
             placeholder="Type your message..."
+            v-model="messageContent"
           ></textarea>
           <div
             class="flex absolute sm:static left-0 bottom-0 ml-5 sm:ml-0 mb-5 sm:mb-0"
@@ -150,12 +153,12 @@
               />
             </div>
           </div>
-          <a
-            href="javascript:;"
-            class="w-8 h-8 sm:w-10 sm:h-10 block bg-primary text-white rounded-full flex-none flex items-center justify-center mr-5"
+          <div
+            @click="sendMessage()"
+            class="w-8 h-8 sm:w-10 sm:h-10 block bg-primary text-white rounded-full flex-none flex items-center justify-center mr-5 cursor-pointer"
           >
             <SendIcon class="w-4 h-4" />
-          </a>
+          </div>
         </div>
       </div>
       <!-- END: Chat Active -->
@@ -169,12 +172,14 @@
 <script>
 import { RouterView } from "vue-router";
 import router from "../../../router";
-import { getUserStore } from "../../../stores";
+import { getProjectStore, getUserStore } from "../../../stores";
 import Roles from "../../../utils/roles";
 import { getfakeUsersProjects } from "../../../services/fake/projectMembers.service";
 import RolesPerGroup from "../../../utils/groupRoles";
 import { calculateTimeDifference } from "../../../utils/date";
-// import WebSocketClient from "../../../services/chat/chat.service";
+import { getConnection } from "../../../services/project/projectChat.service";
+import { getProject } from "../../../services/project/project.service";
+import { Client } from "@stomp/stompjs";
 
 export default {
   data() {
@@ -183,23 +188,98 @@ export default {
       projectData: {}, // Reactive state
       user: null,
       projectMessages: [],
+      project: {
+        longname: null,
+      },
+      connection: null,
+      messageContent: "",
     };
   },
   methods: {
     showChatBox() {
-      this.chatBox = !this.chatBox; // Toggle chatBox state
+      this.chatBox = !this.chatBox; // Toggle chatBox visibility
     },
     myMessage(message) {
-      if (message.sender.id == this.user) {
-        return true;
-      }
-      return false;
+      return message.sender.id === this.user;
     },
     calculateTimeDifferenceM(time) {
       return calculateTimeDifference(time);
     },
-  },
+    async initializeSocket() {
+      try {
+        // Get the project and chat group details
+        const projectData = await getProject(this.$route.params.name, true);
+        if (!projectData) throw new Error("Project data is undefined.");
 
+        this.projectId = projectData.id;
+        this.groupId = projectData.generalChatGroup.id;
+        const token = `Bearer ${sessionStorage.getItem("token")}`;
+
+        // Set up SockJS and STOMP client
+        const socket = new SockJS("http://localhost:6541/ws/chat");
+        this.stompClient = Stomp.over(socket);
+
+        this.stompClient.connect(
+          { Authorization: token },
+          (frame) => {
+            console.log("Connected: " + frame);
+
+            // Subscribe to the chat topic
+            this.stompClient.subscribe(
+              `/topic/chat/${this.projectId}/${this.groupId}`,
+              (messageOutput) => {
+                getProjectStore().project.generalChatGroup.addmessage({
+                  messageOutput,
+                });
+              }
+            );
+          },
+          (error) => {
+            console.error("STOMP connection error:", error);
+          }
+        );
+      } catch (error) {
+        console.error("Error initializing WebSocket:", error);
+      }
+    },
+    sendMessage() {
+      if (this.messageContent.trim() === "") {
+        return;
+      }
+
+      const message = {
+        content: this.messageContent,
+        type: "TEXT", // Adjust message type as necessary
+      };
+
+      if (this.stompClient && this.stompClient.connected) {
+        this.stompClient.send(
+          `/app/chat/${this.projectId}/${this.groupId}`,
+          {},
+          JSON.stringify(message)
+        );
+
+        this.messageContent = ""; // Clear input after sending
+      } else {
+        console.error("STOMP client is not connected.");
+      }
+    },
+
+    displayMessage(message) {
+      this.projectMessages.push(message);
+
+      // Auto-scroll to the bottom of the chat container
+      this.$nextTick(() => {
+        const messageContainer = this.$refs.messages;
+        if (messageContainer) {
+          messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+      });
+    },
+  },
+  async mounted() {
+    await this.initializeSocket();
+  },
   computed: {
     isAdmin() {
       return getUserStore().user.hasRoleInGroup(
@@ -207,15 +287,6 @@ export default {
         RolesPerGroup.GROUPADMIN
       );
     },
-  },
-  mounted() {
-    this.projectData = getfakeUsersProjects();
-    this.user = getUserStore().user.id;
-    this.projectMessages = this.projectData.globalMessages;
-    // let websocket = new WebSocketClient();
-    // websocket.connect(() => {
-    //   console.log("connected to websocket");
-    // });
   },
 };
 </script>

@@ -1,3 +1,5 @@
+import Chatgroup from "./chatgroup";
+
 class Project {
   id = null;
   longname = null;
@@ -11,7 +13,8 @@ class Project {
   projectGroup = null;
   adminGroup = null;
   ressrouceProject = null;
-
+  generalChatGroup = new Chatgroup();
+  adminChatGroup = new Chatgroup();
   constructor() {}
 }
 

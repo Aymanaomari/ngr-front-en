@@ -62,7 +62,7 @@
               </div>
               <div class="lg:col-span-6 col-span-12 mt-3">
                 <label for="first_name" class="form-label capitalize"
-                  >Date of birthd:</label
+                  >Phone:</label
                 >
                 <div class="flex">
                   <select

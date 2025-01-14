@@ -65,10 +65,9 @@
                 v-model="dateOfBirth"
                 :options="{
                   autoApply: true,
-                  showWeekNumbers: true,
                   dropdowns: {
                     minYear: 1990,
-                    maxYear: null,
+                    maxYear: 2030,
                     months: true,
                     years: true,
                   },

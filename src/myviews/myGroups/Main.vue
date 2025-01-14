@@ -1,5 +1,5 @@
 <template>
-  <h2 class="intro-y text-lg font-medium mt-10">Product Grid</h2>
+  <h2 class="intro-y text-lg font-medium mt-10">My Projects</h2>
   <div class="grid grid-cols-12 gap-6 mt-5">
     <div
       class="intro-y col-span-12 flex flex-wrap sm:flex-nowrap items-center mt-2"
@@ -11,14 +11,16 @@
         Create New Group
       </button>
       <div class="hidden md:block mx-auto text-slate-500">
-        Showing 1 to 10 of 150 entries
+        {{ entriesText }}
       </div>
+
       <div class="w-full sm:w-auto mt-3 sm:mt-0 sm:ml-auto md:ml-0">
         <div class="w-56 relative text-slate-500">
           <input
             type="text"
             class="form-control w-56 box pr-10"
-            placeholder="Search..."
+            placeholder="Search by short name"
+            v-model="searchQuery"
           />
           <SearchIcon class="w-4 h-4 absolute my-auto inset-y-0 mr-3 right-0" />
         </div>
@@ -26,7 +28,7 @@
     </div>
     <!-- BEGIN: Users Layout -->
     <div
-      v-for="(project, projectKey) in Projects"
+      v-for="(project, projectKey) in paginatedProjects"
       :key="projectKey"
       class="intro-y col-span-12 md:col-span-6 lg:col-span-4 xl:col-span-3"
     >
@@ -123,55 +125,69 @@
     </div>
     <!-- END: Users Layout -->
     <!-- BEGIN: Pagination -->
+    <!-- BEGIN: Pagination -->
     <div
-      class="intro-y col-span-12 flex flex-wrap sm:flex-row sm:flex-nowrap items-center"
+      class="intro-y col-span-12 flex flex-wrap sm:flex-row sm:flex-nowrap items-center justify-center gap-5"
     >
-      <nav class="w-full sm:w-auto sm:mr-auto">
+      <nav class="w-full sm:w-auto sm:mr-auto justify-self-center">
         <ul class="pagination">
-          <li class="page-item">
-            <a class="page-link" href="#">
+          <li
+            class="page-item text-gray-400"
+            :class="{ disabled: currentPage === 1 }"
+          >
+            <a class="page-link" @click.prevent="currentPage = 1">
               <ChevronsLeftIcon class="w-4 h-4" />
             </a>
           </li>
-          <li class="page-item">
-            <a class="page-link" href="#">
+          <li
+            class="page-item text-gray-40"
+            :class="{ disabled: currentPage === 1 }"
+          >
+            <a class="page-link" @click.prevent="currentPage = currentPage - 1">
               <ChevronLeftIcon class="w-4 h-4" />
             </a>
           </li>
-          <li class="page-item">
-            <a class="page-link" href="#">...</a>
+          <li class="page-item" v-for="page in totalPages" :key="page">
+            <a
+              class="page-link"
+              :class="{ active: currentPage === page }"
+              @click.prevent="currentPage = page"
+            >
+              {{ page }}
+            </a>
           </li>
-          <li class="page-item">
-            <a class="page-link" href="#">1</a>
-          </li>
-          <li class="page-item active">
-            <a class="page-link" href="#">2</a>
-          </li>
-          <li class="page-item">
-            <a class="page-link" href="#">3</a>
-          </li>
-          <li class="page-item">
-            <a class="page-link" href="#">...</a>
-          </li>
-          <li class="page-item">
-            <a class="page-link" href="#">
+          <li
+            class="page-item text-gray-40"
+            :class="{ disabled: currentPage === totalPages }"
+          >
+            <a class="page-link" @click.prevent="currentPage = currentPage + 1">
               <ChevronRightIcon class="w-4 h-4" />
             </a>
           </li>
-          <li class="page-item">
-            <a class="page-link" href="#">
+          <li
+            class="page-item text-gray-40"
+            :class="{ disabled: currentPage === totalPages }"
+          >
+            <a class="page-link" @click.prevent="currentPage = totalPages">
               <ChevronsRightIcon class="w-4 h-4" />
             </a>
           </li>
         </ul>
       </nav>
-      <select class="w-20 form-select box mt-3 sm:mt-0">
+
+      <select
+        class="w-20 form-select box mt-3 sm:mt-0"
+        v-model="itemsPerPage"
+        @change="currentPage = 1"
+      >
         <option>10</option>
         <option>25</option>
         <option>35</option>
         <option>50</option>
       </select>
     </div>
+    <!-- END: Pagination -->
+
     <!-- END: Pagination -->
   </div>
   <!-- BEGIN: Delete Confirmation Modal -->
@@ -323,9 +339,45 @@ export default {
       editorData: ref("<p>Content of the editor.</p>"),
       ProjectVisibilities: [],
       Projects: [],
+      currentPage: 1,
+      itemsPerPage: 10,
+      searchQuery: "",
     };
   },
+  computed: {
+    // Filter projects based on the search query
+    filteredProjects() {
+      return this.Projects.filter((project) =>
+        project.shortName.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+    },
+
+    // Paginate filtered projects
+    paginatedProjects() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.filteredProjects.slice(start, end);
+    },
+
+    // Calculate the total number of pages
+    totalPages() {
+      return Math.ceil(this.filteredProjects.length / this.itemsPerPage);
+    },
+
+    // Display text for showing range
+    entriesText() {
+      const start = (this.currentPage - 1) * this.itemsPerPage + 1;
+      const end = Math.min(
+        this.currentPage * this.itemsPerPage,
+        this.filteredProjects.length
+      );
+      return `Showing ${start} to ${end} of ${this.filteredProjects.length} entries`;
+    },
+  },
   methods: {
+    goToPage(page) {
+      this.currentPage = page;
+    },
     GoToPropositionForm() {
       this.propositionModal = true;
     },

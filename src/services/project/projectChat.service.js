@@ -1,3 +1,5 @@
-export const getConnection = () => {
-  return new WebSocket("ws://localhost:6541/ws/chat");
+import ax from "../../utils/axios";
+
+export const getGroupMessages = (chatGroupId) => {
+  return ax.get(`/registred-user/chat/group/messages/${chatGroupId}`);
 };

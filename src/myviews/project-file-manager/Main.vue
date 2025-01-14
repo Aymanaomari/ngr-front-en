@@ -717,6 +717,7 @@ export default {
             this.fetch();
             this.showCreateModal = false;
             this.newFolderName = "";
+            this.currentPath = [];
           } else {
             // Handle the case where the response is a failure (folder exists)
             console.log(response);

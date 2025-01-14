@@ -34,8 +34,11 @@
         </div>
 
         <!--start of the chat message-->
-        <div class="overflow-y-scroll scrollbar-hidden px-5 pt-5 flex-1">
-          <template v-for="(message, key) in projectMessages" :key="key">
+        <div
+          class="overflow-y-scroll scrollbar-hidden px-5 pt-5 flex-1"
+          ref="chatContent"
+        >
+          <template v-for="(message, key) in messages" :key="key">
             <!--if the send is the same person-->
             <div
               class="chat__box__text-box flex items-end float-right mb-4"
@@ -66,7 +69,7 @@
               >
                 {{ message.content }}
                 <div class="mt-1 text-xs text-white text-opacity-80">
-                  {{ calculateTimeDifferenceM(message.date) }} ago
+                  {{ calculateTimeDifferenceM(message.timestamp) }}
                 </div>
               </div>
               <div
@@ -90,19 +93,19 @@
                 <img
                   alt="Midone Tailwind HTML Admin Template"
                   class="rounded-full"
-                  src="../../../assets/myImages/images.jpeg"
+                  src="../../../assets/myImages/user.png"
                 />
               </div>
               <div
                 class="bg-slate-100 dark:bg-darkmode-400 px-4 py-3 text-slate-500 rounded-r-md rounded-t-md"
               >
                 {{ message.content }}
-                <div class="mt-1 text-xs text-slate-500 flex justify-between">
-                  <span class="font-semibold">{{
-                    message.sender.first_name + " " + message.sender.last_name
+                <div class="mt-1 text-xs text-slate-500 flex gap-1">
+                  <span class="font-bold">{{
+                    message.senderFirstName + " " + message.senderLastName
                   }}</span>
                   <span>
-                    {{ calculateTimeDifferenceM(message.date) }} ago
+                    {{ calculateTimeDifferenceM(message.timestamp) }} ago
                   </span>
                 </div>
               </div>
@@ -127,6 +130,7 @@
                 </DropdownMenu>
               </Dropdown>
             </div>
+
             <div class="clear-both"></div>
           </template>
         </div>
@@ -170,23 +174,17 @@
 </template>
 
 <script>
-import { RouterView } from "vue-router";
-import router from "../../../router";
 import { getProjectStore, getUserStore } from "../../../stores";
-import Roles from "../../../utils/roles";
-import { getfakeUsersProjects } from "../../../services/fake/projectMembers.service";
 import RolesPerGroup from "../../../utils/groupRoles";
-import { calculateTimeDifference } from "../../../utils/date";
-import { getConnection } from "../../../services/project/projectChat.service";
+import { calculateTimeDifferenceStamp } from "../../../utils/date";
 import { getProject } from "../../../services/project/project.service";
-import { Client } from "@stomp/stompjs";
-
+import { getGroupMessages } from "../../../services/project/projectChat.service";
 export default {
   data() {
     return {
       chatBox: false,
       projectData: {}, // Reactive state
-      user: null,
+      user: getUserStore().user.id,
       projectMessages: [],
       project: {
         longname: null,
@@ -195,32 +193,54 @@ export default {
       messageContent: "",
     };
   },
+  computed: {
+    messages() {
+      return getProjectStore().project.generalChatGroup.messages;
+    },
+  },
   methods: {
     showChatBox() {
       this.chatBox = !this.chatBox; // Toggle chatBox visibility
     },
     myMessage(message) {
-      return message.sender.id === this.user;
+      console.log();
+      return message.senderId === this.user;
     },
     calculateTimeDifferenceM(time) {
-      return calculateTimeDifference(time);
+      return calculateTimeDifferenceStamp(time);
     },
     async initializeSocket() {
       try {
-        // Get the project and chat group details
+        // Fetch project and chat group details
         const projectData = await getProject(this.$route.params.name, true);
         if (!projectData) throw new Error("Project data is undefined.");
 
+        // Fetch group messages
+        getGroupMessages(projectData.generalChatGroup.id).then((response) => {
+          getProjectStore().project.generalChatGroup.messages = response.data;
+        });
+
+        // Extract project and group ID
         this.projectId = projectData.id;
         this.groupId = projectData.generalChatGroup.id;
-        const token = `Bearer ${sessionStorage.getItem("token")}`;
+        console.log("Project ID:", this.projectId);
+        console.log("Group ID:", this.groupId);
+
+        // Get authentication token from sessionStorage
+        const token = sessionStorage.getItem("token");
+        if (!token) throw new Error("Authentication token is missing.");
+
+        // Add token to the WebSocket URL as a query parameter
+        const socketUrl = `http://localhost:6541/ws/chat?token=${token}`;
 
         // Set up SockJS and STOMP client
-        const socket = new SockJS("http://localhost:6541/ws/chat");
+        const socket = new SockJS(socketUrl);
+
         this.stompClient = Stomp.over(socket);
 
+        // Connect with authorization headers if needed
         this.stompClient.connect(
-          { Authorization: token },
+          {},
           (frame) => {
             console.log("Connected: " + frame);
 
@@ -228,8 +248,18 @@ export default {
             this.stompClient.subscribe(
               `/topic/chat/${this.projectId}/${this.groupId}`,
               (messageOutput) => {
+                console.lo;
+                // Handle received message
                 getProjectStore().project.generalChatGroup.addmessage({
                   messageOutput,
+                });
+
+                // Scroll to the latest message
+                this.$nextTick(() => {
+                  const chatContent = this.$refs.chatContent;
+                  if (chatContent) {
+                    chatContent.scrollTop = chatContent.scrollHeight;
+                  }
                 });
               }
             );
@@ -242,12 +272,14 @@ export default {
         console.error("Error initializing WebSocket:", error);
       }
     },
+
     sendMessage() {
       if (this.messageContent.trim() === "") {
         return;
       }
 
       const message = {
+        senderId: this.user,
         content: this.messageContent,
         type: "TEXT", // Adjust message type as necessary
       };
@@ -264,29 +296,9 @@ export default {
         console.error("STOMP client is not connected.");
       }
     },
-
-    displayMessage(message) {
-      this.projectMessages.push(message);
-
-      // Auto-scroll to the bottom of the chat container
-      this.$nextTick(() => {
-        const messageContainer = this.$refs.messages;
-        if (messageContainer) {
-          messageContainer.scrollTop = messageContainer.scrollHeight;
-        }
-      });
-    },
   },
   async mounted() {
     await this.initializeSocket();
-  },
-  computed: {
-    isAdmin() {
-      return getUserStore().user.hasRoleInGroup(
-        this.$route.params.name,
-        RolesPerGroup.GROUPADMIN
-      );
-    },
   },
 };
 </script>

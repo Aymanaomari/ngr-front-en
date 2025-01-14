@@ -59,3 +59,35 @@ export const formatDate = (timestamp) => {
   // Format the date as a readable string
   return date.toLocaleString(); // Customize options as needed
 };
+
+export const calculateTimeDifferenceStamp = (unixTimestamp) => {
+  // Convert the UNIX timestamp (in seconds) to milliseconds
+  const targetTime = new Date(unixTimestamp * 1000);
+  const currentTime = new Date();
+
+  // Calculate the difference in milliseconds
+  const differenceInMilliseconds = targetTime - currentTime;
+
+  // Check if the target time is in the past or future
+  const isPast = differenceInMilliseconds < 0;
+
+  // Get the absolute value of the difference for calculations
+  const absoluteDifference = Math.abs(differenceInMilliseconds);
+
+  // Convert milliseconds to time components
+  const seconds = Math.floor(absoluteDifference / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  // Return the appropriate format
+  if (days > 0) {
+    return `${days} days ${isPast ? "ago" : "from now"}`;
+  } else if (hours > 0) {
+    return `${hours} hours ${isPast ? "ago" : "from now"}`;
+  } else if (minutes > 0) {
+    return `${minutes} minutes ${isPast ? "ago" : "from now"}`;
+  } else {
+    return `${seconds} seconds ${isPast ? "ago" : "from now"}`;
+  }
+};

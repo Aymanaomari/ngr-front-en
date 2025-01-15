@@ -15,43 +15,36 @@
         >
           <Edit2Icon class="w-4 mr-2"></Edit2Icon> New
         </button>
-        <button
-        class="btn m-2 bg-white relative"
-        @click="togglePopup"
-      >
-        <MoreHorizontalIcon class="w-4"></MoreHorizontalIcon>
-        <!-- Popup Menu -->
-        <div
-          v-show="showPopup"
-          class="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg z-10"
-        >
-          <button
-            class="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
-            @click="editTask"
+        <button class="btn m-2 bg-white relative" @click="togglePopup">
+          <MoreHorizontalIcon class="w-4"></MoreHorizontalIcon>
+          <!-- Popup Menu -->
+          <div
+            v-show="showPopup"
+            class="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg z-10"
           >
-            Edit Task
-          </button>
-          <button
-            class="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
-            @click="deleteTask"
-          >
-            Delete Task
-          </button>
-        </div>
-      </button>
+            <button
+              class="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
+              @click="editTask"
+            >
+              Edit Task
+            </button>
+            <button
+              class="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
+              @click="deleteTask"
+            >
+              Delete Task
+            </button>
+          </div>
+        </button>
       </div>
       <div class="calendar is-light-mode dark:is-dark-mode">
-        <calendar  heightValue="80vh" ref="calendar" /> 
-         <!--<CalendarComponent />-->
+        <calendar heightValue="80vh" ref="calendar" />
+        <!--<CalendarComponent />-->
       </div>
     </div>
 
     <!-- Modal pour ajouter une nouvelle tâche -->
-    <Modal
-      size="modal-lg"
-      :show="ShowNewModal"
-      @hidden="ShowNewModal = false"
-    >
+    <Modal size="modal-lg" :show="ShowNewModal" @hidden="ShowNewModal = false">
       <ModalHeader>
         <h2 class="font-medium text-base mr-auto">Add Task</h2>
       </ModalHeader>
@@ -151,11 +144,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { usePersonalCalendarStore } from '@/stores/personalCalenderStore.store.js';
-import { transformDate } from '@/utils/date';
+import { ref } from "vue";
+import { usePersonalCalendarStore } from "../../stores/personalCalenderStore";
+import { transformDate } from "@/utils/date";
 
-const showPopup= ref(false);
+const showPopup = ref(false);
 const selectedTask = ref(null); // Holds the currently selected task for edit/delete
 
 const store = usePersonalCalendarStore();
@@ -170,17 +163,17 @@ const newTask = ref({
   id: null,
   description: null,
 });
-const startDate = ref('');
-const startTime = ref('');
-const endDate = ref('');
-const endTime = ref('');
+const startDate = ref("");
+const startTime = ref("");
+const endDate = ref("");
+const endTime = ref("");
 
 const saveTask = async () => {
   const task = {
     title: newTask.value.title,
     time: {
-      start: transformDate(startDate.value) + ' ' + startTime.value,
-      end: transformDate(endDate.value) + ' ' + endTime.value,
+      start: transformDate(startDate.value) + " " + startTime.value,
+      end: transformDate(endDate.value) + " " + endTime.value,
     },
     color: newTask.value.color,
     isEditable: true,
@@ -188,13 +181,11 @@ const saveTask = async () => {
     description: newTask.value.description,
   };
 
-   console.log(task);
+  console.log(task);
 
   await store.addTask(task); // Ajoute la tâche via le store
   ShowNewModal.value = false; // Ferme le modal
 };
-
-
 
 // New code for popup functionality
 const togglePopup = () => {
@@ -202,7 +193,6 @@ const togglePopup = () => {
 };
 
 const editTask = () => {
-  
   ShowNewModal.value = true; // Open the modal for editing
   showPopup.value = true; // Close the popup
 };
@@ -210,9 +200,8 @@ const editTask = () => {
 const deleteTask = async () => {
   ShowNewModal.value = true;
   showPopup.value = true;
- // await store.deleteTask(selectedTask.value.id); // Delete the task via the store
+  // await store.deleteTask(selectedTask.value.id); // Delete the task via the store
 };
-
 </script>
 
 <style lang="css">
@@ -244,5 +233,4 @@ const deleteTask = async () => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 10;
 }
-
 </style>

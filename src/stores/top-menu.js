@@ -34,7 +34,7 @@ export const useTopMenuStore = defineStore("topMenu", {
           title: "Proposition Management",
         },
         {
-          icon: "HomeIcon",
+          icon: "CalendarIcon",
           pageName: "personalCalendar",
           title: "Calendar",
         },
@@ -52,7 +52,7 @@ export const useTopMenuStore = defineStore("topMenu", {
           title: "My Groups",
         },
         {
-          icon: "HomeIcon",
+          icon: "CalendarIcon",
           pageName: "personalCalendar",
           title: "Calendar",
         },

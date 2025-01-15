@@ -1,5 +1,5 @@
 import { useUserStore } from "./user.store";
-import { usePersonalCalendarStore } from "./personalCalenderStore.store.Js";
+import { usePersonalCalendarStore } from "./personalCalenderStore.js";
 import { userProjectStore } from "./project";
 
 export const getPersonalCalendarStore = () => usePersonalCalendarStore();

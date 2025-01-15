@@ -112,13 +112,19 @@
           <div class="text-slate-600 dark:text-slate-500 mt-5"></div>
         </div>
         <div
-          class="flex justify-center lg:justify-end items-center p-5 border-t border-slate-200/60 dark:border-darkmode-400"
+          class="flex justify-between lg:justify-end items-center p-5 border-t border-slate-200/60 dark:border-darkmode-400"
         >
           <a
             class="flex items-center text-primary mr-auto cursor-pointer"
             @click="goToProject(project.shortName)"
           >
             <EyeIcon class="w-4 h-4 mr-1" /> Visite
+          </a>
+          <a
+            class="flex text-end text-primary cursor-pointer"
+            @click="goToWebSite(project.shortName)"
+          >
+            <GlobeIcon class="w-4 h-4 mr-1" /> site web
           </a>
         </div>
       </div>
@@ -315,7 +321,7 @@ import { getProjectTypes } from "../../utils/options";
 import { createProposition } from "../../services/registred-user/porposition.service";
 import { getMyProjects } from "../../services/project/project.service";
 import { getUserStore } from "../../stores";
-
+import { $h } from "../../utils/helper";
 export default {
   data() {
     return {
@@ -420,6 +426,9 @@ export default {
     },
     linkTransform(name) {
       return name.replaceAll(" ", "-");
+    },
+    goToWebSite(shortname) {
+      window.open(`${$h.env("VITE_API_URL")}web/${shortname}`, "_blank");
     },
     // async getlink(projectCategory) {
     //   try {

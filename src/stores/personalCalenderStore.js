@@ -28,7 +28,7 @@
 //       }));
 //     },
 //   },
-  
+
 //   actions: {
 //     setEvents(events) {
 //       this.events = events.map((event) => ({
@@ -51,26 +51,25 @@
 //   },
 // });
 
-
 // src/stores/personalCalendarStore.store.js
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
-import { CalendarService } from '@/services/registred-user/calendar.service.js';
+import { defineStore } from "pinia";
+import { ref } from "vue";
+import { CalendarService } from "@/services/registred-user/calendar.service.js";
 
-export const usePersonalCalendarStore = defineStore('personalCalendar', () => {
+export const usePersonalCalendarStore = defineStore("personalCalendar", () => {
   // Liste des tâches
   const tasks = ref([]);
 
   // Charge les tâches depuis l'API
   const loadTasks = async () => {
     try {
-      console.log('Fetching tasks from API...');
+      console.log("Fetching tasks from API...");
       const tasksFromApi = await CalendarService.fetchTasks();
-      console.log('Tasks fetched:', tasksFromApi);
+      console.log("Tasks fetched:", tasksFromApi);
       tasks.value = tasksFromApi;
-      console.log('Tasks QQQQQQQQQQQQQQQQQ:', tasks.tache);
+      console.log("Tasks QQQQQQQQQQQQQQQQQ:", tasks.tache);
     } catch (error) {
-      console.error('Failed to load tasks:', error);
+      console.error("Failed to load tasks:", error);
     }
   };
 

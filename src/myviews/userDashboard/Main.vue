@@ -155,7 +155,7 @@ export default {
     );
 
     gsap.to(".userName", {
-      text: "Ayman Aomari",
+      text: "Welcome back",
       duration: 2,
       ease: "power1.in",
     });
